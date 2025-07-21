@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { supabase } from '../supabase/supa-client';
 
 interface TokenPayload {
-  uuid: string;
+  id: string;
 }
 
 interface AuthTokens {
@@ -38,8 +38,8 @@ class AuthService {
 
   private generateToken(userId: string): AuthTokens {
     return {
-      accessToken: jwt.sign({ uuid: userId }, this.jwtSecret, { expiresIn: this.ACCESS_TOKEN_EXPIRY }),
-      refreshToken: jwt.sign({ uuid: userId }, this.jwtSecret, { expiresIn: this.REFRESH_TOKEN_EXPIRY })
+      accessToken: jwt.sign({ id: userId }, this.jwtSecret, { expiresIn: this.ACCESS_TOKEN_EXPIRY }),
+      refreshToken: jwt.sign({ id: userId }, this.jwtSecret, { expiresIn: this.REFRESH_TOKEN_EXPIRY })
     };
   }
 
@@ -150,14 +150,14 @@ class AuthService {
       }
 
       // Generate tokens
-      const tokens = this.generateToken(user.uuid);
+      const tokens = this.generateToken(user.id);
       this.setCookies(res, tokens);
 
       // Return user data (excluding sensitive information)
       res.status(200).json({
         message: 'Login successful',
         user: {
-          id: user.uuid,
+          id: user.id,
           username: user.username,
           email: user.email,
           role: user.role,
@@ -186,7 +186,7 @@ class AuthService {
       }
 
       const decoded = jwt.verify(refreshToken, this.jwtSecret) as TokenPayload;
-      const newTokens = this.generateToken(decoded.uuid);
+      const newTokens = this.generateToken(decoded.id);
       this.setCookies(res, newTokens);
 
       res.status(200).json({ message: 'Token refreshed successfully' });

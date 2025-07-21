@@ -4,7 +4,7 @@ import { supabase } from "../supabase/supa-client";
 
 
 interface TokenPayload {
-  uuid: string;
+  id: string;
 }
 
 
@@ -35,13 +35,14 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
         try {
             const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as TokenPayload;
 
-            console.log('Decoded JWT:', decoded);
+            console.log("Decoded token:", decoded);
+
             
             // Supabase query to get user
             const { data: user, error } = await supabase
                 .from('authentication')
                 .select('*')
-                .eq('uuid', decoded.uuid)
+                .eq('id', decoded.id)
                 .single();
 
             if (error || !user) {

@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { supabase } from '../supabase/supa-client';
 
 interface InventoryItem {
-    uuid: string;
     user_id: string;
     productName: string;
     SKU: string;
@@ -15,7 +14,8 @@ class InventoryController {
 
     public async addItem(req: Request, res: Response): Promise<void> {
         try {
-            const { user_id, productName, SKU, quantity, location }: InventoryItem = req.body;
+            const userId = req.user?.id;
+            const {  productName, SKU, quantity, location }: InventoryItem = req.body;
 
             if (!productName || !SKU || quantity === undefined || !location) {
                 res.status(400).json({ error: 'All fields are required' });
@@ -25,7 +25,7 @@ class InventoryController {
             const { data, error } = await supabase
             .from('Inventory')
             .insert([{
-                user_id,
+                user_id: userId,
                 productName,
                 SKU,
                 quantity,
