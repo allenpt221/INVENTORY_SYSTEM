@@ -7,20 +7,30 @@ interface InventoryItem {
     SKU: string;
     quantity: number;
     location: string;
+    supplier: string;
+    category: string,
     created_at: string;
 }
+
 
 class InventoryController {
 
     public async addItem(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.id;
-            const {  productName, SKU, quantity, location }: InventoryItem = req.body;
+            const {  productName, SKU, quantity, location, supplier, category }: InventoryItem = req.body;
 
             if (!productName || !SKU || quantity === undefined || !location) {
                 res.status(400).json({ error: 'All fields are required' });
                 return;
             }
+
+            if (!userId) {
+                console.error('No user ID found on request');
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+
             // Insert item into the Inventory table
             const { data, error } = await supabase
             .from('Inventory')
@@ -30,10 +40,19 @@ class InventoryController {
                 SKU,
                 quantity,
                 location,
+                supplier,
+                category,
                 created_at: new Date().toISOString(),
             }]).select()
             .single();
 
+            if (error) {
+                console.error('Error creating items:', error);
+                res.status(500).json({ error: 'Failed to creating items' });
+                return;
+            }
+
+        
 
             res.status(201).json({
                 message: 'Item added successfully', data: data})
@@ -41,6 +60,92 @@ class InventoryController {
         } catch (error: any) {
             console.error('Creating Item Erro', error);
             res.status(401).json({ error: 'Internal server error' });
+        }
+    }
+
+    public async getItems(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = req.user?.id;
+
+            // Fetch items from the Inventory table
+            const { data, error } = await supabase
+                .from('Inventory')
+                .select('*')
+                .eq('user_id', userId);
+
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                res.status(500).json({ error: 'Failed to fetch items' });
+                return;
+            }
+
+            res.status(200).json({ items: data });
+
+        } catch (error: any) {
+            console.error('Error in getItems:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    public async updateQuantity(req: Request, res: Response): Promise<void> {
+        try {
+            const itemId = req.params.id;
+            const { quantity }:InventoryItem = req.body;
+
+            if (quantity === undefined) {
+                res.status(400).json({ error: 'Quantity is required' });
+                return;
+            }
+
+            const { data} = await supabase
+                .from('Inventory')
+                .update({ quantity })
+                .eq('id', itemId)
+                .select()
+                .single();
+
+            res.status(200).json({
+                message: 'Quantity updated successfully',
+                item: data
+            });
+
+            
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            res.status(500).json({ error: 'Failed to update quantity' });
+        }
+    }
+
+    public async searchItem(req: Request, res: Response): Promise<void> {
+        const query = req.query.q as string;
+
+        if (!query || query.trim() === '') {
+            res.status(400).json({ error: 'Missing or empty query parameter "q"' });
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+            .from('Inventory')
+            .select('*')
+            .or(`
+                productName.ilike.%${query}%,
+                SKU.ilike.%${query}%,
+                location.ilike.%${query}%,
+                supplier.ilike.%${query}%,
+                category.ilike.%${query}%
+            `.replace(/\s+/g, '')
+        );
+
+            if (error) throw error;
+
+            console.log('Search results:', data); // <--- Add this
+
+            res.status(200).json({ results: data });
+        } catch (err: any) {
+            console.error('❌ Search error:', err.message); // <--- Add this
+            res.status(500).json({ error: err.message || 'Internal server error' });
         }
     }
 
