@@ -16,17 +16,18 @@ app.use(cookieParser());
 
 
 (async () => {
-  const { data, error } = await supabase.from('authentication').select('*');
-  if (error) {
-    console.error('Supabase error:', error.message);
-  } else {
-    console.log('Supabase connected. Sample data:', data);
+  try {
+    const response = await supabase.auth.getSession(); 
+    console.log('✅ Supabase is connected and reachable.', response);
+  } catch (error: any) {
+    console.error('❌ Failed to connect to Supabase:', error.message);
   }
 })();
 
 
-app.use('/auth', userRoutes);
-app.use('/inventory', inventoryRoutes);
+
+app.use('/api/auth', userRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 
 app.get('/', (_req, res) => {
