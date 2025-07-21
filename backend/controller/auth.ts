@@ -61,6 +61,28 @@ class AuthService {
     });
   }
 
+  public async getAllUsers(req: Request, res: Response): Promise<void> {
+    try {
+
+        const {data: users, error} = await supabase
+        .from('authentication')
+        .select('*')
+
+
+        if (error) {
+          console.error('Supabase error:', error);
+          res.status(500).json({ success: false, error: 'Failed to fetch users' });
+          return;
+        }
+
+        res.status(200).json({success:true, user: users})
+
+    } catch (error: any) {
+      console.log('get all user', error)
+      res.status(400).json({error: 'Internal Server Error'})
+    }
+  }
+
   public async signUp(req: Request, res: Response): Promise<void> {
     try {
       const { username, email, password }: SignUpData = req.body;
