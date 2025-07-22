@@ -3,12 +3,12 @@ import {
   Home,
   Inbox,
   LogOutIcon,
-  Search,
-  Settings,
   User2,
   ChevronUp,
   Sun,
   Moon,
+  LayoutDashboard,
+  ArrowRightLeft,
 } from "lucide-react";
 
 import {
@@ -37,19 +37,28 @@ type AppSidebarProps = {
   logout: () => void;
   DarkMode: Boolean;
   toggleDarkMode: () => void;
+  role?: string;
 };
 
 const items = [
   { title: "Home", icon: Home, url: "/home" },
   { title: "Inventory", icon: Inbox, url: "/inventory" },
   { title: "Products", icon: Calendar, url: "/products" },
-  { title: "transaction", icon: Search, url: "/transaction" },
-  { title: "Settings", icon: Settings, url: "/settings" },
+  { title: "transaction", icon: ArrowRightLeft, url: "/transaction" },
+  { title: "dashboard", icon: LayoutDashboard , url: "/dashboard", requiresAdmin: true },
 ];
 
-export function AppSidebar({ username, logout, DarkMode, toggleDarkMode }: AppSidebarProps) {
+
+
+
+export function AppSidebar({ username, logout, DarkMode, toggleDarkMode, role }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const filteredItems = items.filter(
+  (item) => !item.requiresAdmin || role?.toLowerCase() === "superadmin"
+);
+
 
   return (
     <Sidebar className="flex flex-col h-full">
@@ -58,7 +67,7 @@ export function AppSidebar({ username, logout, DarkMode, toggleDarkMode }: AppSi
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {filteredItems.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
 
                 return (
