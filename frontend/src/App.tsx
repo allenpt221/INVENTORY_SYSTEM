@@ -9,11 +9,18 @@ import { Inventory } from "./Common/Inventory";
 import { Products } from "./Common/Products";
 import { Transaction } from "./Common/Transaction";
 import { Dashboard } from "./Common/Dashboard";
+import { productStore } from "./Stores/productStore";
 
 function App() {
   const checkAuth = authUserStore((state) => state.checkAuth);
   const user = authUserStore((state) => state.user);
 
+  const getProducts = productStore((state) => state.getProducts);
+  
+
+  useEffect(() => {
+    getProducts();
+  }, [])
 
   useEffect(() => {
     checkAuth();

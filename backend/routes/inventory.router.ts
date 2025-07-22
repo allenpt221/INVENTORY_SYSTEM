@@ -12,6 +12,8 @@ router.get('/', protectRoute, inventoryController.getItems.bind(inventoryControl
 router.get('/search', protectRoute, inventoryController.searchItem.bind(inventoryController));
 
 router.put('/:id', protectRoute, inventoryController.updateQuantity.bind(inventoryController));
+router.delete('/:id', protectRoute, inventoryController.deleteProduct.bind(inventoryController));
+
 
 
 
