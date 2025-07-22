@@ -217,6 +217,14 @@ class AuthService {
       res.status(401).json({ error: 'Invalid refresh token' });
     }
   }
+
+  public async getProfile (req: Request, res: Response): Promise<void> {
+    try {
+      res.json(req.user);
+    } catch (error: any) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
 }
 
 export const authService = new AuthService();
