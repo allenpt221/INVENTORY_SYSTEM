@@ -16,11 +16,12 @@ function App() {
   const user = authUserStore((state) => state.user);
 
   const getProducts = productStore((state) => state.getProducts);
+
   
 
   useEffect(() => {
     getProducts();
-  }, [])
+  }, [getProducts])
 
   useEffect(() => {
     checkAuth();
