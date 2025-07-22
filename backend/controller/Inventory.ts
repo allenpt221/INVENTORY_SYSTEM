@@ -149,6 +149,26 @@ class InventoryController {
         }
     }
 
+    public async deleteProduct(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+
+            const { error } = await supabase
+            .from("Inventory")
+            .delete()
+            .eq('id', id)
+
+            if (error) {
+            res.status(500).json({ message: "Failed to delete product", error });
+            return;
+        }
+
+            res.status(200).json({ message: "Product deleted successfully" });   
+        } catch (error: any) {
+            res.status(500).json({ message: "Unexpected error in deletingProduct", error: error });
+        }
+    }
+
 }
 
 export const inventoryController = new InventoryController();

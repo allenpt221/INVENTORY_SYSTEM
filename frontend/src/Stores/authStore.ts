@@ -50,8 +50,7 @@ export const authUserStore = create<UserState>((set, get) => ({
         await axios.post('auth/logout');
         set({user: null})
     } catch (error) {
-      console.error('logout failed:', error);
-        
+      console.error('logout failed:', error);    
     }
   },
 
