@@ -12,7 +12,7 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table"
 
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import {  ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -39,7 +39,7 @@ import { productStore, type Products } from "@/Stores/productStore"
 
 export type Product = {
   id: number
-  productName: string
+  product: string
   SKU: string
   quantity: number
   location: string
@@ -47,6 +47,7 @@ export type Product = {
   created_at:  string | Date
   category: string
 }
+
 
 export const columns: ColumnDef<Products>[] = [
   {
@@ -72,7 +73,7 @@ export const columns: ColumnDef<Products>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "productName",
+    accessorKey: "product",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -83,7 +84,11 @@ export const columns: ColumnDef<Products>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue("productName")}</div>,
+    cell: ({ row }) => {
+      const product = row.getValue("product") as String
+      const capitalizedProduct = product.charAt(0).toUpperCase() + product.slice(1)
+    return <div>{capitalizedProduct}</div>
+  },
   },
   {
     accessorKey: "SKU",
@@ -92,8 +97,39 @@ export const columns: ColumnDef<Products>[] = [
   },
   {
     accessorKey: "quantity",
-    header: "Quantity",
-    cell: ({ row }) => <div>{row.getValue("quantity")}</div>,
+    header: () => (
+    <div className="text-center">
+      Stock
+    </div>
+    ),
+    cell: ({ row }) => <div className="text-center">{row.getValue("quantity")}</div>
+  },
+  {
+    id: "stockStatus",
+    header: () => (
+    <div className="text-center">
+      Status
+    </div>
+    ),
+    cell: ({ row }) => {
+    const quantity = row.getValue<number>("quantity"); 
+    const outStock = quantity <= 0;
+    const lowStock = quantity < 10 && quantity > 0;
+
+    return (
+      <div className={`text-center`}>
+        {outStock
+          ? 
+          <span className="bg-red-200/20 border border-red-400 rounded text-red-500 text-sm px-2">Out of Stock </span>
+          : lowStock
+          ? 
+          <span className="bg-yellow-200/20 border border-yellow-400 rounded text-yellow-500 text-sm px-2">Low Stock </span>
+          : 
+          <span className="bg-green-300/20 border border-green-400 rounded text-green-500 text-sm px-2">On Stock </span>
+          }
+      </div>
+    )
+    }
   },
   {
     accessorKey: "location",
@@ -107,7 +143,7 @@ export const columns: ColumnDef<Products>[] = [
   },
   {
     accessorKey: "created_at",
-    header: "Created At",
+    header: "Registered On",
     cell: ({ row }) => {
       const rawDate = row.getValue("created_at") as string;
       const date = new Date(rawDate);
@@ -117,7 +153,11 @@ export const columns: ColumnDef<Products>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => <div>{row.getValue("category")}</div>,
+    cell: ({ row }) => {
+      const category = row.getValue("category") as string
+      const capitalized = category.charAt(0).toUpperCase() + category.slice(1) 
+      return <div>{capitalized}</div>
+    }
   },
   {
     id: "actions",
@@ -164,10 +204,12 @@ export const columns: ColumnDef<Products>[] = [
 export function Products() {
   const rawProducts = productStore((state) => state.products) ?? []
 
+
   const products = React.useMemo(() => {
     return Array.isArray(rawProducts)
       ? rawProducts.map((item) => ({
           ...item,
+          product: item.productName,
           created_at: new Date(item.created_at),
         }))
       : []
@@ -177,12 +219,15 @@ export function Products() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [globalFilter, setGlobalFilter] = React.useState("")
+
 
   const table = useReactTable({
     data: products,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -194,23 +239,35 @@ export function Products() {
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter
     },
+    globalFilterFn: (row, _, filterValue) => {
+      const name = String(row.getValue("productName") || "").toLowerCase()
+      const supplier = String(row.getValue("supplier") || "").toLowerCase()
+      const category = String(row.getValue("category") || "").toLowerCase()
+      const SKU = String(row.getValue("SKU") || "").toLowerCase()
+      const Location = String(row.getValue("location") || "").toLowerCase()
+
+      const value = String(filterValue).toLowerCase()
+
+      return name.includes(value) || supplier.includes(value) || category.includes(value) || SKU.includes(value) || Location.includes(value)
+    }
+
+    
   })
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex flex-col sm:flex-row gap-2 lg:items-center items-start py-4 px-2 ">
         <Input
-          placeholder="Filter product..."
-          value={(table.getColumn("productName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("productName")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search product or supplier..."
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="sm:ml-auto ml-0">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -231,8 +288,8 @@ export function Products() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="w-full  border rounded mx-2">
+        <Table className="lg:min-w-full min-w-[1300px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -259,8 +316,8 @@ export function Products() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                <TableCell colSpan={columns.length} className="h-20 text-center">
+                  No products found
                 </TableCell>
               </TableRow>
             )}
@@ -272,24 +329,7 @@ export function Products() {
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+
       </div>
     </div>
   )

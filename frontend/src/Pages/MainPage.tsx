@@ -51,7 +51,7 @@ export function MainPage() {
     <div className="flex h-screen relative">
       <SidebarProvider>
         <AppSidebar role={user?.role} DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} username={user?.username} />
-        <main className="flex-1 p-4">
+        <main className="flex-1 p-4 w-full overflow-hidden">
           <SidebarTrigger />
           {showAlert && (
             <Alert
