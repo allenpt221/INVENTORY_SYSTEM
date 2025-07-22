@@ -3,16 +3,54 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react"
+import { authUserStore } from "@/Stores/authStore"
+
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
+  const login = authUserStore((state) => state.login);
+  const loading = authUserStore((state) => state.loading);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<boolean>(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const success = await login(email, password);
+
+  if(!success){
+    setError(true);
+  }
+};
+
+useEffect(() => {
+  if (!error) return;
+
+  const timeout = setTimeout(() => {
+    setError(false);
+  }, 2000);
+
+  return () => clearTimeout(timeout);
+}, [error]); 
+
+
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6 relative", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form onSubmit={handleSubmit}
+          className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -25,6 +63,8 @@ export function LoginForm({
                 <Input
                   id="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="m@example.com"
                   required
                 />
@@ -35,10 +75,14 @@ export function LoginForm({
                 </div>
                 <Input 
                 placeholder="********"
-                id="password" type="password" required />
+                id="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                 required />
               </div>
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className={`w-full ${loading ? 'opacity-70' : ''}`}>
+                {loading ? 'Logging in' : 'Login'}
               </Button>
               <a
                   href="#"
@@ -67,6 +111,16 @@ export function LoginForm({
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
+
+      {error && (
+        <Alert variant="destructive" className="absolute w-[30rem]  right-30 -top-[14rem]">
+        <AlertCircleIcon />
+        <AlertTitle>Invalid credentials.</AlertTitle>
+        <AlertDescription>
+          <p>Please verify your account information and try again.</p>
+        </AlertDescription>
+      </Alert>
+      )}
     </div>
   )
 }
