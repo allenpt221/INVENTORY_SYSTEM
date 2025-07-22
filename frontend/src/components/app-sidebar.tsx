@@ -7,6 +7,8 @@ import {
   Settings,
   User2,
   ChevronUp,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -33,17 +35,19 @@ import { useNavigate, useLocation } from "react-router-dom";
 type AppSidebarProps = {
   username?: string;
   logout: () => void;
+  DarkMode: Boolean;
+  toggleDarkMode: () => void;
 };
 
 const items = [
   { title: "Home", icon: Home, url: "/home" },
-  { title: "Inventory", icon: Inbox, url: "inventory" },
-  { title: "Products", icon: Calendar, url: "products" },
-  { title: "transaction", icon: Search, url: "transaction" },
-  { title: "Settings", icon: Settings, url: "#" },
+  { title: "Inventory", icon: Inbox, url: "/inventory" },
+  { title: "Products", icon: Calendar, url: "/products" },
+  { title: "transaction", icon: Search, url: "/transaction" },
+  { title: "Settings", icon: Settings, url: "/settings" },
 ];
 
-export function AppSidebar({ username, logout }: AppSidebarProps) {
+export function AppSidebar({ username, logout, DarkMode, toggleDarkMode }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -55,20 +59,20 @@ export function AppSidebar({ username, logout }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = location.pathname === item.url;
+                const isActive = location.pathname.startsWith(item.url);
 
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       onClick={() => {
-                        if (!isActive && item.url !== "#") {
+                        if (!isActive) {
                           navigate(item.url);
                         }
                       }}
                       className={`flex items-center gap-2 w-full text-left ${
                         isActive
-                          ? "bg-muted text-primary cursor-default"
-                          : "hover:bg-accent"
+                            ? "text-primary cursor-default"
+                          : "hover:bg-accent cursor-pointer"
                       }`}
                       disabled={isActive}
                     >
@@ -84,20 +88,22 @@ export function AppSidebar({ username, logout }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
+        <SidebarMenu >
           <SidebarMenuItem>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild className="cursor-pointer">
                 <SidebarMenuButton className="flex items-center w-full gap-2">
                   <User2 />
                   <span>{username}</span>
-                  <ChevronUp className="ml-auto" />
+                  <ChevronUp className="ml-auto " />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="right" className="mb-5">
-                <DropdownMenuItem>Account</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuItem onClick={logout}>
+                <DropdownMenuItem className="cursor-pointer">Account</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">Billing</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={toggleDarkMode}>{DarkMode ?  <span className="flex gap-2 items-center"><Moon /> Dark Mode</span> : <span className="flex gap-2 items-center"><Sun /> Light Mode</span> }</DropdownMenuItem>
+
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
                   <LogOutIcon className="mr-2 w-4 h-4" /> Log Out
                 </DropdownMenuItem>
               </DropdownMenuContent>

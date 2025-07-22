@@ -12,13 +12,29 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Outlet } from "react-router-dom";
+import { useTheme } from "@/components/ThemProvider";
 
 export function MainPage() {
   const user = authUserStore((state) => state.user);
   const logout = authUserStore((state) => state.logout);
   const justLoggedIn = authUserStore((state) => state.justLoggedIn);
   const setJustLoggedIn = authUserStore((state) => state.setJustLoggedIn);
-  const [showAlert, setShowAlert] = useState(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+
+  const { theme, setTheme } = useTheme();
+  const [Istheme, setIsTheme] = useState<boolean>(false);
+
+
+
+  const toggleDarkMode = () => {
+    if (theme === "dark") {
+      setTheme("light")
+      setIsTheme(true)
+    } else {
+      setTheme("dark")
+      setIsTheme(false)
+    }
+  };
 
   useEffect(() => {
     if (justLoggedIn && user) {
@@ -34,7 +50,7 @@ export function MainPage() {
   return (
     <div className="flex h-screen relative">
       <SidebarProvider>
-        <AppSidebar logout={logout} username={user?.username} />
+        <AppSidebar DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} username={user?.username} />
         <main className="flex-1 p-4">
           <SidebarTrigger />
           {showAlert && (
