@@ -125,7 +125,7 @@ export const columns: ColumnDef<Products>[] = [
     cell: ({ row }) => {
       const product = row.original
 
-      
+    const deleteProduct =  productStore((state) => state.deleteProduct);
 
       return (
         <DropdownMenu>
@@ -143,7 +143,7 @@ export const columns: ColumnDef<Products>[] = [
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(product.id))}
+              onClick={() => deleteProduct((product.id))}
             >
               Delete product
             </DropdownMenuItem>

@@ -21,7 +21,7 @@ interface productState {
 }
 
 
-export const productStore = create<productState>((set) => ({
+export const productStore = create<productState>((set, get) => ({
     products: [],
     setProduct: (products) => set({products}),
 
@@ -37,7 +37,9 @@ export const productStore = create<productState>((set) => ({
     deleteProduct: async(id: number): Promise<void> => { 
         try {
             await axios.delete(`inventory/${id}`);
-            
+            const updated = get().products.filter(product => product.id !== id);
+            set({ products: updated });
+
             console.log(`Product with ID ${id} deleted successfully`);
 
         } catch (error) {
