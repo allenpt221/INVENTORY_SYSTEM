@@ -93,7 +93,7 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -100 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative mx-2"
+        className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative mx-2 dark:bg-black"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -139,7 +139,7 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
               <button
                 type="button"
                 onClick={handleGenerateBarcode}
-                className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
+                className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm dark:text-black"
               >
                 Auto
               </button>
@@ -179,13 +179,13 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
             <button
               type="button"
               onClick={isClose}
-              className="border shadow hover:bg-muted cursor-pointer px-3 py-1 rounded-md"
+              className="border shadow hover:bg-muted cursor-pointer px-3 py-1 rounded-md dark:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="border bg-black text-white rounded-md px-3 py-1 cursor-pointer"
+              className="border bg-black text-white rounded-md px-3 py-1 cursor-pointer dark:bg-white dark:text-black"
             >
               Register Product
             </button>
