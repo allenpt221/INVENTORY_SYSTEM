@@ -75,14 +75,11 @@ class InventoryController {
 
     public async getItems(req: Request, res: Response): Promise<void> {
         try {
-            const userId = req.user?.id;
 
             // Fetch items from the Inventory table
             const { data, error } = await supabase
                 .from('Inventory')
                 .select('*')
-                .eq('user_id', userId);
-
 
             if (error) {
                 console.error('Error fetching items:', error);
