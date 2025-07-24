@@ -13,6 +13,8 @@ router.get('/search', protectRoute, inventoryController.searchItem.bind(inventor
 
 router.put('/:id', protectRoute, inventoryController.updateQuantity.bind(inventoryController));
 router.delete('/:id', protectRoute, inventoryController.deleteProduct.bind(inventoryController));
+router.put('/productupdate/:id', protectRoute, inventoryController.updateProduct.bind(inventoryController));
+
 
 
 

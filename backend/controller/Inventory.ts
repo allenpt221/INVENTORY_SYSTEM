@@ -3,6 +3,7 @@ import { supabase } from '../supabase/supa-client';
 import cloudinary from '../lib/cloudinary';
 
 interface InventoryItem {
+    id: number;
     user_id: string;
     productName: string;
     SKU: string;
@@ -123,6 +124,45 @@ class InventoryController {
             res.status(500).json({ error: 'Failed to update quantity' });
         }
     }
+
+    public async updateProduct(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params
+            const { productName, SKU, quantity, barcode, brand, category, image }: InventoryItem = req.body;
+
+            if (!id) {
+            res.status(400).json({ error: "Missing product ID" });
+            return;
+            }
+
+            let updatedFields: Partial<InventoryItem> = { productName, SKU, quantity, barcode, brand, category };
+
+            if (image) {
+            const cloudinaryResponse = await cloudinary.uploader.upload(image, {
+                folder: "products",
+            });
+            updatedFields.image = cloudinaryResponse.secure_url;
+            }
+
+            const { data, error } = await supabase
+            .from("Inventory")
+            .update(updatedFields)
+            .eq("id", id) // <-- critical: specify which row to update
+            .select(); // optional: return updated row
+
+            if (error) {
+            console.error("Supabase update error:", error);
+            res.status(500).json({ error: "Failed to update product" });
+            return;
+            }
+
+            res.status(200).json({ message: "Product updated successfully", data });
+        } catch (error: any) {
+            console.error("Error updating product:", error);
+            res.status(500).json({ error: "Server error while updating product" });
+        }
+    }
+
 
     public async searchItem(req: Request, res: Response): Promise<void> {
         const query = req.query.q as string;
