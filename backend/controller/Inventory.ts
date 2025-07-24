@@ -65,7 +65,7 @@ class InventoryController {
         
 
             res.status(201).json({
-                message: 'Item added successfully', data: data})
+                message: 'Item added successfully', products: data})
             
         } catch (error: any) {
             console.error('Creating Item Error', error);
@@ -160,21 +160,41 @@ class InventoryController {
         try {
             const { id } = req.params;
 
-            const { error } = await supabase
+            const { data, error } = await supabase
             .from("Inventory")
             .delete()
-            .eq('id', id)
+            .eq("id", id)
+            .select(); // Ensures `data` is returned
 
             if (error) {
                 res.status(500).json({ message: "Failed to delete product", error });
-                return;
+                return
             }
 
-            res.status(200).json({ message: "Product deleted successfully" });   
-        } catch (error: any) {
-            res.status(500).json({ message: "Unexpected error in deletingProduct", error: error });
+            const deletedProduct = data?.[0];
+
+            // Delete image from Cloudinary if it exists
+            if (deletedProduct?.image) {
+            const imageUrlParts = deletedProduct.image.split("/");
+            const filenameWithExt = imageUrlParts.pop();
+            const publicId = filenameWithExt?.split(".")[0];
+
+            if (publicId) {
+                try {
+                await cloudinary.uploader.destroy(`products/${publicId}`);
+                } catch (cloudErr: any) {
+                console.error("Cloudinary deletion failed:", cloudErr.message);
+                // Optional: continue anyway or return 500 here if it's critical
+                }
+            }
+            }
+
+            res.status(200).json({ message: "Product deleted successfully" });
+        } catch (err: any) {
+            res.status(500).json({ message: "Unexpected error in deleteProduct", error: err.message });
         }
-    }
+        }
+
 
 }
 
