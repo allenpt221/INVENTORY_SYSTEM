@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { supabase } from '../supabase/supa-client';
+import cloudinary from '../lib/cloudinary';
 
 interface InventoryItem {
     user_id: string;
@@ -9,6 +10,7 @@ interface InventoryItem {
     barcode: string;
     brand: string;
     category: string,
+    image: string,
     created_at: string;
 }
 
@@ -18,7 +20,14 @@ class InventoryController {
     public async addItem(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.id;
-            const {  productName, SKU, quantity, barcode, brand, category }: InventoryItem = req.body;
+            const {  productName, SKU, quantity, barcode, brand, category, image }: InventoryItem = req.body;
+
+            let cloudinaryResponse = null;
+
+
+            if(image){
+                cloudinaryResponse = await cloudinary.uploader.upload(image, { folder: "products"});
+            }
 
             if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category) {
                 res.status(400).json({ error: 'All fields are required' });
@@ -42,6 +51,7 @@ class InventoryController {
                 barcode,
                 brand,
                 category,
+                image: cloudinaryResponse?.secure_url ?? "",
                 created_at: new Date().toISOString(),
             }]).select()
             .single();
