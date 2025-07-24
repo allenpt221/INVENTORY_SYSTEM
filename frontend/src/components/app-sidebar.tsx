@@ -33,7 +33,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 type AppSidebarProps = {
-  username?: string;
+  email?: string;
   logout: () => void;
   DarkMode: Boolean;
   toggleDarkMode: () => void;
@@ -61,7 +61,7 @@ function useIsMobile(breakpoint = 640) {
 }
 
 export function AppSidebar({
-  username,
+  email,
   logout,
   DarkMode,
   toggleDarkMode,
@@ -117,8 +117,8 @@ export function AppSidebar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="cursor-pointer">
                 <div className="flex items-center w-full gap-2 px-2 py-2 rounded hover:bg-accent cursor-pointer">
-                  <User2 />
-                  <span>{username}</span>
+                  <User2 size={15}/>
+                  <span className="text-sm">{email}</span>
                   <ChevronUp className="ml-auto" />
                 </div>
               </DropdownMenuTrigger>

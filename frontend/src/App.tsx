@@ -5,11 +5,12 @@ import { authUserStore } from "./Stores/authStore";
 import { useEffect } from "react";
 import { MainPage } from "./Pages/MainPage";
 import { HomePage } from "./Common/Home";
-import { Inventory } from "./Common/Inventory";
-import { Products } from "./Common/Products";
 import { Transaction } from "./Common/Transaction";
 import { Dashboard } from "./Common/Dashboard";
 import { productStore } from "./Stores/productStore";
+import { Inventory } from './Common/Inventory'
+import { Product } from './Common/Product'
+
 
 function App() {
   const checkAuth = authUserStore((state) => state.checkAuth);
@@ -59,7 +60,7 @@ function App() {
             <Route index element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/inventory" element={<Inventory />} />
-            <Route path="/products" element={<Products />} />
+            <Route path="/products" element={<Product />} />
             <Route path="/transaction" element={<Transaction/>} />
             <Route path="/dashboard" element={user?.role === "superAdmin" && <Dashboard/>} />
 

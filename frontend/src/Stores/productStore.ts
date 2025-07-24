@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import axios from '../lib/axios';
-import { Products } from '@/Common/Products';
 
 export type Products = {
     id: number;

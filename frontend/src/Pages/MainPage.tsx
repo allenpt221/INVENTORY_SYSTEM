@@ -50,7 +50,7 @@ export function MainPage() {
   return (
     <div className="flex h-screen relative">
       <SidebarProvider>
-        <AppSidebar role={user?.role} DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} username={user?.username} />
+        <AppSidebar role={user?.role} DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} email={user?.email} />
         <main className="flex-1 p-4 w-full overflow-hidden">
           <SidebarTrigger />
           {showAlert && (
@@ -60,7 +60,7 @@ export function MainPage() {
             >
               <CheckCircle2Icon className="h-5 w-5 text-green-500 mt-1 shrink-0" />
               <div>
-                <AlertTitle>Welcome! {user?.username}</AlertTitle>
+                <AlertTitle>Welcome! {user?.email}</AlertTitle>
                 <AlertDescription>
                   You have successfully logged in.
                 </AlertDescription>
