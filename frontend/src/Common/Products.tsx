@@ -213,6 +213,12 @@ export function Products() {
   const rawProducts = productStore((state) => state.products) ?? []
   const deleteProduct =  productStore((state) => state.deleteProduct);
 
+  const getProducts = productStore((state) => state.getProducts);
+
+    React.useEffect(() => {
+      getProducts();
+    }, [getProducts]);
+
 
 
   const products = React.useMemo(() => {
