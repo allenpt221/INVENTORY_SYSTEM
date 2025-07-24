@@ -10,13 +10,26 @@ export type Products = {
     brand: string;
     created_at: Date;
     category: string;
+    image?: string | File;
 }
+
+export type ProductInput = {
+  productName: string;
+  SKU: string;
+  quantity: number;
+  brand: string;
+  barcode: string;
+  category: string;
+  image?: string; 
+};
 
 interface productState {
     products: Products[];
     setProduct: (products: Products[]) => void;
     getProducts: () => void;
-    deleteProduct:(id: number) => void;
+    createProduct: (registedProduct: ProductInput) => void;
+    deleteProduct: (id: number) => void;
+
 }
 
 
@@ -28,8 +41,21 @@ export const productStore = create<productState>((set, get) => ({
         try {
             const res = await axios.get('/inventory');
             set({ products:res.data.items });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed fetching data:', error);    
+        }
+    },
+
+    createProduct: async( registedProduct: ProductInput ): Promise<void> => {
+        try {
+            const res = await axios.post('inventory/create', registedProduct);
+
+            set((prevState) => ({
+                products: [...prevState.products, res.data.products]
+            }));
+            
+        } catch (error: any) {
+            console.error("Error creating product:", error);
         }
     },
 
@@ -39,9 +65,8 @@ export const productStore = create<productState>((set, get) => ({
             const updated = get().products.filter(product => product.id !== id);
             set({ products: updated });
 
-            console.log(`Product with ID ${id} deleted successfully`);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to delete Product:', error);    
         }
     }

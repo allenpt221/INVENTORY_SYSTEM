@@ -37,6 +37,8 @@ import {
 
 import { productStore, type Products } from "@/Stores/productStore"
 import { authUserStore } from "@/Stores/authStore"
+import { CreateProduct } from "@/Modal/CreateProduct"
+import { AnimatePresence } from "framer-motion"
 
 export type Product = {
   id: number
@@ -223,7 +225,7 @@ export function Inventory() {
   const getProducts = productStore((state) => state.getProducts);
   const user = authUserStore((state) => state.user);
 
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
 
     React.useEffect(() => {
@@ -377,12 +379,15 @@ export function Inventory() {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
       </div>
-
+      
+      <AnimatePresence>
       {isOpen && (
-        <div>
-          asdsa
-        </div>
+        <CreateProduct 
+          isOpen={true}
+          isClose={() => setIsOpen(false)}
+        />
       )}
+      </AnimatePresence>
     </div>
   )
 }
