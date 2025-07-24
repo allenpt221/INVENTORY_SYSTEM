@@ -6,8 +6,8 @@ interface InventoryItem {
     productName: string;
     SKU: string;
     quantity: number;
-    location: string;
-    supplier: string;
+    barcode: string;
+    brand: string;
     category: string,
     created_at: string;
 }
@@ -18,9 +18,9 @@ class InventoryController {
     public async addItem(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.id;
-            const {  productName, SKU, quantity, location, supplier, category }: InventoryItem = req.body;
+            const {  productName, SKU, quantity, barcode, brand, category }: InventoryItem = req.body;
 
-            if (!productName || !SKU || quantity === undefined || !location) {
+            if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category) {
                 res.status(400).json({ error: 'All fields are required' });
                 return;
             }
@@ -39,8 +39,8 @@ class InventoryController {
                 productName,
                 SKU,
                 quantity,
-                location,
-                supplier,
+                barcode,
+                brand,
                 category,
                 created_at: new Date().toISOString(),
             }]).select()
@@ -58,7 +58,7 @@ class InventoryController {
                 message: 'Item added successfully', data: data})
             
         } catch (error: any) {
-            console.error('Creating Item Erro', error);
+            console.error('Creating Item Error', error);
             res.status(401).json({ error: 'Internal server error' });
         }
     }
