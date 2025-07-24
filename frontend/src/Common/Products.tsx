@@ -12,7 +12,7 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table"
 
-import {  ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import {  ArrowUpDown, ChevronDown, MoreHorizontal, Trash } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -42,8 +42,8 @@ export type Product = {
   product: string
   SKU: string
   quantity: number
-  location: string
-  supplier: string
+  barcode: string
+  brand: string
   created_at:  string | Date
   category: string
 }
@@ -60,12 +60,16 @@ export const columns: ColumnDef<Products>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
+        className="cursor-pointer"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => {row.toggleSelected(!!value)
+          const selected = row.original.id;
+          console.log(`Row ${!!value ? "selected" : "deselected"}: ID =`, selected);
+        }}
         aria-label="Select row"
       />
     ),
@@ -92,8 +96,12 @@ export const columns: ColumnDef<Products>[] = [
   },
   {
     accessorKey: "SKU",
-    header: "SKU",
-    cell: ({ row }) => <div>{row.getValue("SKU")}</div>,
+    header: () => (
+    <div className="text-center">
+      SKU
+    </div>
+    ),
+    cell: ({ row }) => <div className="text-center">{row.getValue("SKU")}</div>,
   },
   {
     accessorKey: "quantity",
@@ -105,7 +113,7 @@ export const columns: ColumnDef<Products>[] = [
     cell: ({ row }) => <div className="text-center">{row.getValue("quantity")}</div>
   },
   {
-    id: "stockStatus",
+    id: "Status",
     header: () => (
     <div className="text-center">
       Status
@@ -132,14 +140,14 @@ export const columns: ColumnDef<Products>[] = [
     }
   },
   {
-    accessorKey: "location",
+    accessorKey: "brand",
     header: "Location",
-    cell: ({ row }) => <div>{row.getValue("location")}</div>,
+    cell: ({ row }) => <div>{row.getValue("brand")}</div>,
   },
   {
-    accessorKey: "supplier",
+    accessorKey: "barcode",
     header: "Supplier",
-    cell: ({ row }) => <div>{row.getValue("supplier")}</div>,
+    cell: ({ row }) => <div>{row.getValue("barcode")}</div>,
   },
   {
     accessorKey: "created_at",
@@ -203,6 +211,8 @@ export const columns: ColumnDef<Products>[] = [
 
 export function Products() {
   const rawProducts = productStore((state) => state.products) ?? []
+  const deleteProduct =  productStore((state) => state.deleteProduct);
+
 
 
   const products = React.useMemo(() => {
@@ -258,13 +268,32 @@ export function Products() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row gap-2 lg:items-center items-start py-4 px-2 ">
+      <div className="flex flex-col sm:flex-row gap-2 lg:items-center items-start py-3 px-2 ">
+        <div className="space-y-1">
         <Input
           placeholder="Search product or supplier..."
           value={globalFilter ?? ""}
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
         />
+        <button
+          disabled={table.getSelectedRowModel().rows.length === 0}
+          onClick={() => {
+            const selectedIds = table
+              .getSelectedRowModel()
+              .rows
+              .map(row => row.original.id)
+            selectedIds.forEach(id => deleteProduct(id))
+          }}
+          className={`${table.getSelectedRowModel().rows.length === 0 ? 'hidden' : 'block'} text-sm px-2 text-black/50 cursor-pointer`}
+        >
+          <span className="flex items-center gap-1">
+          <Trash size={15}/>
+          Delete Selected ({table.getSelectedRowModel().rows.length})
+          </span>
+        </button>
+
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="sm:ml-auto ml-0">
