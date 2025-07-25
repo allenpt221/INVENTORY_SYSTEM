@@ -10,17 +10,21 @@ export type Products = {
     brand: string;
     created_at: Date;
     category: string;
+    price: number;
+    total: number;
     image?: string | File;
 }
 
 export type ProductInput = {
-  productName: string;
-  SKU: string;
-  quantity: number;
-  brand: string;
-  barcode: string;
-  category: string;
-  image?: string; 
+    productName: string;
+    SKU: string;
+    quantity: number;
+    brand: string;
+    barcode: string;
+    category: string;
+    image?: string; 
+    price: number;
+    total: number;
 };
 
 interface productState {
@@ -29,6 +33,7 @@ interface productState {
     getProducts: () => void;
     createProduct: (registedProduct: ProductInput) => void;
     deleteProduct: (id: number) => void;
+    updateStock: (id: number, quantity: number) => void;
 
 }
 
@@ -48,7 +53,7 @@ export const productStore = create<productState>((set, get) => ({
 
     createProduct: async( registedProduct: ProductInput ): Promise<void> => {
         try {
-            const res = await axios.post('inventory/create', registedProduct);
+            const res = await axios.post('/inventory/create', registedProduct);
 
             set((prevState) => ({
                 products: [...prevState.products, res.data.products]
@@ -61,7 +66,7 @@ export const productStore = create<productState>((set, get) => ({
 
     deleteProduct: async(id: number): Promise<void> => { 
         try {
-            await axios.delete(`inventory/${id}`);
+            await axios.delete(`/inventory/${id}`);
             const updated = get().products.filter(product => product.id !== id);
             set({ products: updated });
 
@@ -69,5 +74,21 @@ export const productStore = create<productState>((set, get) => ({
         } catch (error: any) {
             console.error('Failed to delete Product:', error);    
         }
+    },
+
+    updateStock: async (id: number, quantity: number): Promise<void> => {
+        try {
+            const res = await axios.put(`/inventory/${id}`, { quantity }); // <-- Add slash before ID
+
+            const updatedData = res.data.stock
+
+            const updated = get().products.map(product =>
+            product.id === id ? { ...product, ...updatedData } : product // or update as needed
+            );
+            set({ products: updated });
+        } catch (error: any) {
+            console.error('Failed to update Product stock:', error);
+        }
     }
+
 }));
