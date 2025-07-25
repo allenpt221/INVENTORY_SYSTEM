@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { use, useState } from "react";
 import { productStore, type ProductInput } from "@/Stores/productStore";
 
 type RegisteredProduct = {
@@ -10,20 +10,17 @@ type RegisteredProduct = {
   isClose: () => void;
 };
 
-// Barcode generator function
-const generateBarcode = (length = 12): string => {
+const generateBarcode = (length = 8): string => {
   const digits = "0123456789";
-  let barcode = "";
-  for (let i = 0; i < length; i++) {
-    barcode += digits[Math.floor(Math.random() * digits.length)];
-  }
-  return barcode;
+  return Array.from({ length }, () => digits[Math.floor(Math.random() * digits.length)]).join("");
 };
 
 export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
   if (!isOpen) return null;
 
-  const [registered, setIsRegistered] = useState<ProductInput>({
+  const [error, setError] = useState<Record<string, string>>({});
+
+  const [registered, setRegistered] = useState<ProductInput>({
     productName: "",
     SKU: "",
     quantity: 0,
@@ -31,18 +28,33 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
     barcode: "",
     category: "",
     image: "",
+    price: 0,
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const createProduct = productStore((state) => state.createProduct);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setIsRegistered((prev) => ({
-      ...prev,
-      [name]: name === "quantity" ? Number(value) : value,
-    }));
-  };
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  const parsedValue = ["quantity", "price"].includes(name) ? Number(value) : value;
+
+  // Update the registered values
+  setRegistered((prev) => ({
+    ...prev,
+    [name]: parsedValue,
+  }));
+
+  // Remove error for the field if value is not empty
+  if (name === "barcode" && value.trim() !== "") {
+    setError((prev) => {
+      const updatedError = { ...prev };
+      delete updatedError[name];
+      return updatedError;
+    });
+  }
+}
+
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,80 +63,134 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
       reader.onloadend = () => {
         const result = reader.result as string;
         setImagePreview(result);
-        setIsRegistered((prev) => ({ ...prev, image: result }));
-      };
+        setRegistered((prev) => ({ ...prev, image: result }));
+        
+        setError((prev) => {
+        const updated = { ...prev };
+        delete updated.image;
+        return updated;
+      });
+    };
       reader.readAsDataURL(file);
     }
   };
 
   const handleGenerateBarcode = () => {
-    setIsRegistered((prev) => ({
+    setRegistered((prev) => ({
       ...prev,
       barcode: generateBarcode(),
     }));
+
+    setError((prev) => {
+    const updated = { ...prev };
+    delete updated.barcode;
+    return updated;
+  });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    createProduct(registered);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
 
-    setIsRegistered({
-      productName: "",
-      SKU: "",
-      quantity: 0,
-      brand: "",
-      barcode: "",
-      category: "",
-      image: "",
-    });
-    setImagePreview(null);
-    isClose();
+      const newErrors: Record<string, string> = {};
+
+      if(!registered.productName){
+        newErrors.productName = "Product name is required";
+      }
+      if(!registered.SKU){
+        newErrors.SKU = "Stock Keeping Unit is required";
+      }
+      if(!registered.quantity){
+        newErrors.quantity = "Quantity is required";
+      }
+      if(!registered.brand){
+        newErrors.brand = "Brand name is required";
+      }
+      if(!registered.barcode){
+        newErrors.barcode = "Barcode is required";
+      }
+      if(!registered.price){
+        newErrors.price = "product price is required";
+      }
+
+      if(!registered.category){
+        newErrors.category = "product category is required";
+      }
+      if(!registered.image){
+        newErrors.image = "product image is required";
+      }
+
+      if(Object.keys(newErrors).length > 0){
+        setError(newErrors);
+        return;
+      }
+
+      createProduct(registered);
+      setRegistered({
+        productName: "",
+        SKU: "",
+        quantity: 0,
+        brand: "",
+        barcode: "",
+        category: "",
+        image: "",
+        price: 0,
+      });
+      setImagePreview(null);
+      isClose();
+    } catch (error: any) {
+      console.log("Failed to create Products", error.message);
+    }
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-      onClick={isClose}
-      role="dialog"
-      aria-modal="true"
-    >
+    <div className="fixed inset-0 bg-black/50 flex justify-end z-50" onClick={isClose} role="dialog">
       <motion.div
-        initial={{ opacity: 0, y: -25 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -100 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative mx-2 dark:bg-black"
+        initial={{ width: 0 }}
+        animate={{ width: 400 }}
+        exit={{ width: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white h-full shadow-lg overflow-y-auto dark:bg-black border"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold">Register Product</h1>
+        <div className="flex justify-between items-center px-4 py-2 border-b">
+          <h2 className="text-lg font-semibold">Register Product</h2>
           <button
             onClick={isClose}
             className="text-gray-500 hover:text-black transition"
-            aria-label="Close modal"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {["productName", "SKU", "quantity", "brand", "category"].map((field) => (
-            <div className="grid gap-1.5" key={field}>
-              <Label className="text-sm font-medium capitalize">{field === "SKU" ? "Stock Keeping Unit" : field}</Label>
+        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {[
+            { name: "productName", label: "Product" },
+            { name: "SKU", label: "Stock Keeping Unit" },
+            { name: "quantity", label: "Quantity" },
+            { name: "brand", label: "Brand" },
+            { name: "category", label: "Category" },
+            { name: "price", label: "Price" },
+          ].map(({ name, label }) => (
+            <div className="grid gap-1.5" key={name}>
+              <Label className="text-sm font-medium">{label}</Label>
               <Input
-                name={field}
-                type="text"
-                value={(registered as any)[field]}
-                placeholder={`Enter ${field}`}
+                name={name}
+                type={name === "price" ? "number" : "text"}
+                step={name === "price" ? "0.01" : undefined}
+                placeholder={`Enter ${label}`}
                 className="rounded-md"
+                value={(registered as any)[name]}
                 onChange={handleChange}
               />
+              {error[name] && (
+                <p className="text-red-500 text-xs mt-1">{(error as any)[name]}</p>
+              )}
             </div>
           ))}
 
-          {/* Barcode Input + Generate Button */}
+          {/* Barcode with Generate */}
           <div className="grid gap-1.5">
             <Label className="text-sm font-medium">Barcode</Label>
             <div className="flex gap-2">
@@ -139,11 +205,14 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
               <button
                 type="button"
                 onClick={handleGenerateBarcode}
-                className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm dark:text-black"
+                className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
               >
                 Auto
               </button>
             </div>
+              {error.barcode && (
+                <p className="text-red-500 text-xs mt-1">{error.barcode}</p>
+              )}
           </div>
 
           {/* Image Upload */}
@@ -153,7 +222,7 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
             </Label>
             <label
               htmlFor="image"
-              className="border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:border-gray-500 transition"
+              className="border-2 border-dashed h-[14rem] border-gray-300 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:border-gray-500 transition"
             >
               {imagePreview ? (
                 <img
@@ -172,24 +241,18 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
                 onChange={handleImageChange}
               />
             </label>
+            {error.image && (
+                <p className="text-red-500 text-xs mt-1">{error.image}</p>
+              )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex font-medium justify-end gap-2">
-            <button
-              type="button"
-              onClick={isClose}
-              className="border shadow hover:bg-muted cursor-pointer px-3 py-1 rounded-md dark:bg-muted"
-            >
-              Cancel
-            </button>
+          {/* Buttons */}
             <button
               type="submit"
-              className="border bg-black text-white rounded-md px-3 py-1 cursor-pointer dark:bg-white dark:text-black"
+              className="mt-5 w-full bg-black text-white py-2 rounded-md hover:bg-black/70 cursor-pointer transition"
             >
               Register Product
             </button>
-          </div>
         </form>
       </motion.div>
     </div>

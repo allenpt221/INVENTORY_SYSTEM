@@ -8,7 +8,7 @@ export type Products = {
     quantity: number;
     barcode: string;
     brand: string;
-    created_at: Date;
+    created_at: Date ;
     category: string;
     price: number;
     total: number;
@@ -24,8 +24,10 @@ export type ProductInput = {
     category: string;
     image?: string; 
     price: number;
-    total: number;
+    total?: number;
 };
+
+export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
 
 interface productState {
     products: Products[];
@@ -34,7 +36,7 @@ interface productState {
     createProduct: (registedProduct: ProductInput) => void;
     deleteProduct: (id: number) => void;
     updateStock: (id: number, quantity: number) => void;
-
+    updateProduct: (productId: ProductUpdatePayload) => void;
 }
 
 
@@ -89,6 +91,22 @@ export const productStore = create<productState>((set, get) => ({
         } catch (error: any) {
             console.error('Failed to update Product stock:', error);
         }
-    }
+    },
+
+    updateProduct: async (productData: ProductUpdatePayload): Promise<void> => {
+        try {
+            await axios.put(`/inventory/productupdate/${productData.id}`, productData);
+
+
+            set((prevState) => ({
+            products: prevState.products.map((product) =>
+                product.id === productData.id ? { ...product, ...productData } : product
+            ),
+            }));
+        } catch (error) {
+            console.error("Failed to update product:", error);
+        }
+    },
+
 
 }));

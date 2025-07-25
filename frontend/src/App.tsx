@@ -36,9 +36,9 @@ function App() {
     // Optional: render a spinner/loading indicator
     return  (
       <div className="flex justify-center items-center h-screen">
-        <div className="flex flex-col items-center justify-center h-screen bg-white gap-4">
-          <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-black-600 text-lg font-medium">Loading...</p>
+        <div className="flex flex-col items-center justify-center h-screen  gap-4">
+          <div className="w-12 h-12 border-4 border-black dark:border-white dark:border-t-black border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-black-600 text-lg font-medium ">Loading...</p>
         </div>
       </div>
     )
