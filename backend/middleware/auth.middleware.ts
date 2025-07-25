@@ -35,7 +35,6 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
         try {
             const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as TokenPayload;
 
-            console.log("Decoded token:", decoded);
 
             
             // Supabase query to get user

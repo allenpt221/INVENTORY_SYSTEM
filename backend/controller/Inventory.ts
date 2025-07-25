@@ -11,7 +11,9 @@ interface InventoryItem {
     barcode: string;
     brand: string;
     category: string,
-    image: string,
+    image: string;
+    price: number;
+    total: number;
     created_at: string;
 }
 
@@ -21,7 +23,12 @@ class InventoryController {
     public async addItem(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.id;
-            const {  productName, SKU, quantity, barcode, brand, category, image }: InventoryItem = req.body;
+            const {  productName, SKU, quantity, barcode, brand, category, image, price }: InventoryItem = req.body;
+
+            const Parseprice = parseFloat(price as any);
+            const ParseQuantity = parseInt(quantity as any);
+
+            const total = Parseprice * ParseQuantity
 
             let cloudinaryResponse = null;
 
@@ -30,7 +37,7 @@ class InventoryController {
                 cloudinaryResponse = await cloudinary.uploader.upload(image, { folder: "products"});
             }
 
-            if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category) {
+            if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category || !price) {
                 res.status(400).json({ error: 'All fields are required' });
                 return;
             }
@@ -48,10 +55,12 @@ class InventoryController {
                 user_id: userId,
                 productName,
                 SKU,
-                quantity,
+                quantity: ParseQuantity,
                 barcode,
                 brand,
                 category,
+                price: Parseprice,
+                total,
                 image: cloudinaryResponse?.secure_url ?? "",
                 created_at: new Date().toISOString(),
             }]).select()
@@ -76,7 +85,7 @@ class InventoryController {
 
     public async getItems(req: Request, res: Response): Promise<void> {
         try {
-
+            const itemId = req.params.id;
             // Fetch items from the Inventory table
             const { data, error } = await supabase
                 .from('Inventory')
@@ -88,6 +97,8 @@ class InventoryController {
                 return;
             }
 
+
+
             res.status(200).json({ items: data });
 
         } catch (error: any) {
@@ -97,33 +108,50 @@ class InventoryController {
     }
 
     public async updateQuantity(req: Request, res: Response): Promise<void> {
-        try {
-            const itemId = req.params.id;
-            const { quantity }:InventoryItem = req.body;
+            try {
+                const itemId = req.params.id;
+                const { quantity }: { quantity: number } = req.body;
 
-            if (quantity === undefined) {
-                res.status(400).json({ error: 'Quantity is required' });
-                return;
+                if (typeof quantity !== 'number' || isNaN(quantity)) {
+                    res.status(400).json({ error: 'Quantity must be a valid number' });
+                    return;
+                }
+
+                const { data: item, error: fetchError } = await supabase
+                    .from('Inventory')
+                    .select('price')
+                    .eq('id', itemId)
+                    .single();
+
+                if (fetchError || !item) {
+                    console.error('Fetch error:', fetchError?.message);
+                    res.status(404).json({ error: 'Item not found' });
+                    return;
+                }
+
+                const total = quantity * item.price;
+
+                const { data: updatedItem, error: updateError } = await supabase
+                    .from('Inventory')
+                    .update({ quantity, total })
+                    .eq('id', itemId)
+                    .select('id, quantity, price, total')
+                    .single();
+
+                if (updateError || !updatedItem) {
+                    console.error('Update error:', updateError?.message);
+                    res.status(500).json({ error: 'Failed to update inventory' });
+                    return;
+                }
+
+                res.status(200).json({ message: 'Updated successfully', data: updatedItem });
+            } catch (error) {
+                console.error('Server error:', error);
+                res.status(500).json({ error: 'Internal server error' });
             }
-
-            const { data} = await supabase
-                .from('Inventory')
-                .update({ quantity })
-                .eq('id', itemId)
-                .select()
-                .single();
-
-            res.status(200).json({
-                message: 'Quantity updated successfully',
-                item: data
-            });
-
-            
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-            res.status(500).json({ error: 'Failed to update quantity' });
         }
-    }
+
+
 
     public async updateProduct(req: Request, res: Response): Promise<void> {
         try {
@@ -191,7 +219,7 @@ class InventoryController {
 
             res.status(200).json({ results: data });
         } catch (err: any) {
-            console.error('❌ Search error:', err.message); // <--- Add this
+            console.error(' Search error:', err.message); // <--- Add this
             res.status(500).json({ error: err.message || 'Internal server error' });
         }
     }
@@ -201,39 +229,32 @@ class InventoryController {
             const { id } = req.params;
 
             const { data, error } = await supabase
-            .from("Inventory")
-            .delete()
-            .eq("id", id)
-            .select(); // Ensures `data` is returned
+                .from("Inventory")
+                .delete()
+                .eq("id", id)
+                .select()
+                .single();
 
             if (error) {
                 res.status(500).json({ message: "Failed to delete product", error });
-                return
+                return;
             }
 
-            const deletedProduct = data?.[0];
+            const deletedProduct = data;
 
-            // Delete image from Cloudinary if it exists
-            if (deletedProduct?.image) {
-            const imageUrlParts = deletedProduct.image.split("/");
-            const filenameWithExt = imageUrlParts.pop();
-            const publicId = filenameWithExt?.split(".")[0];
-
-            if (publicId) {
+            if (deletedProduct?.public_id) {
                 try {
-                await cloudinary.uploader.destroy(`products/${publicId}`);
+                    await cloudinary.uploader.destroy(deletedProduct.public_id);
                 } catch (cloudErr: any) {
-                console.error("Cloudinary deletion failed:", cloudErr.message);
-                // Optional: continue anyway or return 500 here if it's critical
+                    console.error("Cloudinary deletion failed:", cloudErr.message);
                 }
-            }
             }
 
             res.status(200).json({ message: "Product deleted successfully" });
         } catch (err: any) {
             res.status(500).json({ message: "Unexpected error in deleteProduct", error: err.message });
         }
-        }
+    }
 
 
 }
