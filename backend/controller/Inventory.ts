@@ -152,7 +152,7 @@ class InventoryController {
                     return;
                 }
 
-                res.status(200).json({ message: 'Updated successfully', data: updatedItem });
+                res.status(200).json({ message: 'Updated successfully', stock: updatedItem });
             } catch (error) {
                 console.error('Server error:', error);
                 res.status(500).json({ error: 'Internal server error' });
@@ -164,14 +164,18 @@ class InventoryController {
     public async updateProduct(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params
-            const { productName, SKU, quantity, barcode, brand, category, image }: InventoryItem = req.body;
+            const { productName, SKU, quantity, barcode, brand, category, price, image }: InventoryItem = req.body;
 
             if (!id) {
             res.status(400).json({ error: "Missing product ID" });
             return;
             }
 
-            let updatedFields: Partial<InventoryItem> = { productName, SKU, quantity, barcode, brand, category };
+            const parsedPrice = Number(price);
+            const parsedQuantity = Number(quantity);
+            const total = parsedPrice * parsedQuantity;
+
+            let updatedFields: Partial<InventoryItem> = { productName, SKU,  barcode, brand, category, quantity: parsedQuantity, price: parsedPrice, total };
 
             if (image) {
             const cloudinaryResponse = await cloudinary.uploader.upload(image, {
