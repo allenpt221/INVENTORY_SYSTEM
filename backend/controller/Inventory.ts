@@ -129,7 +129,15 @@ class InventoryController {
                     return;
                 }
 
-                const total = quantity * item.price;
+                //Ensure price is a valid number
+                const price = Number(item.price);
+                if (isNaN(price)) {
+                    res.status(500).json({ error: 'Invalid price in database' });
+                    return;
+                }
+
+                const total = quantity * price;
+
 
                 const { data: updatedItem, error: updateError } = await supabase
                     .from('Inventory')
