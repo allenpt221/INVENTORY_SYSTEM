@@ -54,6 +54,18 @@ export function UpdateProduct({
     }
   }, [updateProductData]);
 
+    const [panelWidth, setPanelWidth] = useState(400);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPanelWidth(window.innerWidth <= 640 ? 300 : 400); // sm breakpoint
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -87,13 +99,13 @@ export function UpdateProduct({
     >
       <motion.div
         initial={{ width: 0 }}
-        animate={{ width: 400 }}
+        animate={{ width: panelWidth }}
         exit={{ width: 0 }}
         transition={{ duration: 0.3 }}
         className="bg-white h-full shadow-lg overflow-y-auto dark:bg-black dark:border"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-4 py-2 border-b">
+        <div className="flex justify-between items-center py-2 border-b-2 mx-5">
           <h2 className="text-lg font-semibold">Update Product</h2>
           <button
             onClick={isClose}

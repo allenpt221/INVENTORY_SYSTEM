@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
-import { use, useState } from "react";
+import { useEffect, useState } from "react";
 import { productStore, type ProductInput } from "@/Stores/productStore";
 
 type RegisteredProduct = {
@@ -31,8 +31,23 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
     price: 0,
   });
 
+
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const createProduct = productStore((state) => state.createProduct);
+
+
+  const [panelWidth, setPanelWidth] = useState(400);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPanelWidth(window.innerWidth <= 640 ? 300 : 400); // sm breakpoint
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { name, value } = e.target;
@@ -147,13 +162,13 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     <div className="fixed inset-0 bg-black/50 flex justify-end z-50" onClick={isClose} role="dialog">
       <motion.div
         initial={{ width: 0 }}
-        animate={{ width: 400 }}
+        animate={{ width: panelWidth }}
         exit={{ width: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white h-full shadow-lg overflow-y-auto dark:bg-black border"
+        className="bg-white h-full shadow-lg sm:overflow-y-hidden overflow-y-auto dark:bg-black border"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-4 py-2 border-b">
+        <div className="flex justify-between items-center py-2 border-b-2 mx-5">
           <h2 className="text-lg font-semibold">Register Product</h2>
           <button
             onClick={isClose}
