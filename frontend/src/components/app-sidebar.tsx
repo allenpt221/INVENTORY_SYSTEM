@@ -35,6 +35,7 @@ import { useEffect, useState } from "react";
 type AppSidebarProps = {
   email?: string;
   logout: () => void;
+  createstaff: () => void;
   DarkMode: Boolean;
   toggleDarkMode: () => void;
   role?: string;
@@ -66,12 +67,13 @@ export function AppSidebar({
   DarkMode,
   toggleDarkMode,
   role,
+  createstaff,
 }: AppSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
 
   const filteredItems = items.filter(
-    (item) => !item.requiresAdmin || role?.toLowerCase() === "superadmin"
+    (item) => !item.requiresAdmin || role?.toLowerCase() === "manager"
   );
 
   return (
@@ -129,7 +131,10 @@ export function AppSidebar({
                 }`}
               >
                 <DropdownMenuItem className="cursor-pointer">Account</DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">Billing</DropdownMenuItem>
+                {role === "manager" && (
+                  <DropdownMenuItem className="cursor-pointer"
+                  onClick={createstaff}>Register Staff</DropdownMenuItem>
+                )}
                 <DropdownMenuItem className="cursor-pointer" onClick={toggleDarkMode}>
                   {DarkMode ? (
                     <span className="flex gap-2 items-center">

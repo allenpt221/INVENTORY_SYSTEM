@@ -302,7 +302,7 @@ export function Inventory() {
               <DropdownMenuItem onClick={() => handleUpdateStock(product.id)}>
                 Update Stock
               </DropdownMenuItem>
-              {user?.role === "superAdmin" && (
+              {user?.role === "manager" && (
               <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleUpdateProduct(product.id)}>Update Product</DropdownMenuItem>
@@ -353,7 +353,7 @@ export function Inventory() {
 
   return (
     <div className="w-full">
-      {user?.role === "superAdmin" && (
+      {user?.role === "manager" && (
           <button
             onClick={() => setIsOpen(true)}
             className="border py-1 w-[9rem] rounded text-sm flex justify-center items-center gap-1 cursor-pointer"

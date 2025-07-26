@@ -13,6 +13,10 @@ import {
 import { AppSidebar } from "@/components/app-sidebar";
 import { Outlet } from "react-router-dom";
 import { useTheme } from "@/components/ThemProvider";
+import { CreateStaff } from "@/Modal/CreateStaff";
+
+
+
 
 export function MainPage() {
   const user = authUserStore((state) => state.user);
@@ -20,11 +24,12 @@ export function MainPage() {
   const justLoggedIn = authUserStore((state) => state.justLoggedIn);
   const setJustLoggedIn = authUserStore((state) => state.setJustLoggedIn);
   const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [openSignup, setOpenSignup] = useState<boolean>(false);
 
   const { theme, setTheme } = useTheme();
   const [Istheme, setIsTheme] = useState<boolean>(false);
 
-
+;
 
   const toggleDarkMode = () => {
     if (theme === "dark") {
@@ -47,10 +52,12 @@ export function MainPage() {
     }
   }, [justLoggedIn, user]);
 
+
+
   return (
     <div className="flex h-screen relative">
       <SidebarProvider>
-        <AppSidebar role={user?.role} DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} email={user?.email} />
+        <AppSidebar createstaff={() => setOpenSignup(true)} role={user?.role} DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} email={user?.email} />
         <main className="flex-1 p-4 w-full overflow-hidden">
           <SidebarTrigger />
           {showAlert && (
@@ -70,6 +77,12 @@ export function MainPage() {
           <Outlet />
         </main>
       </SidebarProvider>
+
+      {openSignup && (
+        <CreateStaff 
+        isOpen={true}
+        isClose={() => setOpenSignup(false)}/>
+      )}
     </div>
   );
 }

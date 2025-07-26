@@ -8,6 +8,13 @@ type User = {
   role: string;
 };
 
+export type signupStaff = {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+}
+
 interface UserState {
   user: User | null;
   loading: boolean;
@@ -16,6 +23,7 @@ interface UserState {
   setJustLoggedIn: (value: boolean) => void;
   setUser: (user: User) => void;
   clearUser: () => void;
+  signupStaff: (createuser: signupStaff) => Promise<void>;
   login: (email: string, password: string) => Promise<Boolean>;
   checkAuth: () => Promise<void>;
   refreshToken: () => Promise<any>;
@@ -31,6 +39,20 @@ export const authUserStore = create<UserState>((set, get) => ({
 
   setUser: (user) => set({ user }),
   clearUser: () => set({ user: null }),
+
+  // only manager can create staff account
+  signupStaff: async(createuser: signupStaff): Promise<void> => {
+    try {
+      const res = await axios.post('/auth/signstaff', createuser);
+
+      console.log("Staff created:", res.data.staff);
+      
+    } catch (error: any) {
+      const message = error?.response?.data?.error || 'Failed to create staff. Please try again.';
+        console.error('Signup error:', message);
+        throw new Error(message);
+    }
+  }, 
 
   login: async (email: string, password: string): Promise<Boolean> => {
     set({ loading: true });
