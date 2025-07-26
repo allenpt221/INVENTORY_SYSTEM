@@ -62,63 +62,82 @@ class AuthService {
     });
   }
 
-public async createStaff(req: Request, res: Response): Promise<void> {
-    try {
-        const adminId = (req as any).user?.id;
-        const { username, email, password }: SignUpData = req.body;
+  public async createStaff(req: Request, res: Response): Promise<void> {
+      try {
+          const adminId = (req as any).user?.id;
+          const { username, email, password }: SignUpData = req.body;
 
-        if (!adminId) {
-            res.status(401).json({ error: "Unauthorized" });
-            return
-        }
+          if (!adminId) {
+              res.status(401).json({ error: "Unauthorized" });
+              return
+          }
 
-        const normalizedEmail = email.trim().toLowerCase();
+          const normalizedEmail = email.trim().toLowerCase();
 
-        // Check if email already exists
-        const { data: existUser } = await supabase
-            .from('staffAuthentication')
-            .select('email')
-            .eq('email', normalizedEmail)
-            .single();
 
-        if (existUser) {
-            res.status(409).json({ error: 'User with this email already exists' });
-            return
-        }
+          const { count, error: countError } = await supabase
+              .from('staffAuthentication')
+              .select('staff_id', { count: 'exact'})
+              .eq('admin_id', adminId);
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
-
-        // Insert staff
-        const { error } = await supabase
-            .from('staffAuthentication')
-            .insert([{
-                username,
-                email: normalizedEmail,
-                password: hashedPassword,
-                admin_id: adminId
-            }]);
-
-        if (error) {
-            console.error('Supabase error:', error);
-            res.status(500).json({ error: 'Failed to create user' });
-            return
-        }
-
-         res.status(201).json({
-            message: 'User created successfully',
-            data: {
-                username,
-                email: normalizedEmail
+            if (countError) {
+              console.error('Error counting staff:', countError);
+              res.status(500).json({ error: 'Failed to check staff count' });
+              return;
             }
-        });
 
-    } catch (error: any) {
-        console.error('Server error:', error);
-        res.status(500).json({ error: 'Internal server error'})
-        return
-    }
-}
+            if ((count ?? 0) >= 3) {
+              res.status(403).json({ error: 'Staff creation limit reached (max 3)' });
+              return;
+            }
+
+
+          // Check if email already exists
+          const { data: existUser } = await supabase
+              .from('staffAuthentication')
+              .select('email')
+              .eq('email', normalizedEmail)
+              .single();
+
+          if (existUser) {
+              res.status(409).json({ error: 'User with this email already exists' });
+              return
+          }
+
+          // Hash password
+          const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
+
+          // Insert staff
+          const { error } = await supabase
+              .from('staffAuthentication')
+              .insert([{
+                  username,
+                  email: normalizedEmail,
+                  password: hashedPassword,
+                  role: 'staff',
+                  admin_id: adminId
+              }]);
+
+          if (error) {
+              console.error('Supabase error:', error);
+              res.status(500).json({ error: 'Failed to create user' });
+              return
+          }
+
+          res.status(201).json({
+              message: 'User created successfully',
+              staff: {
+                  username,
+                  email: normalizedEmail
+              }
+          });
+
+      } catch (error: any) {
+          console.error('Server error:', error);
+          res.status(500).json({ error: 'Internal server error'})
+          return
+      }
+  }
 
 
   public async getAllUsers(req: Request, res: Response): Promise<void> {
