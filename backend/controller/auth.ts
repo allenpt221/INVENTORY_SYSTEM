@@ -15,6 +15,7 @@ interface AuthTokens {
 interface LoginCredentials {
   email: string;
   password: string;
+  role: string
 }
 
 interface SignUpData {
@@ -202,7 +203,7 @@ public async createStaff(req: Request, res: Response): Promise<void> {
 
   public async logIn(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password }: LoginCredentials = req.body;
+      const { email, password, role }: LoginCredentials = req.body;
 
       if (!email || !password) {
         res.status(400).json({ error: 'Email and password are required' });
@@ -218,7 +219,6 @@ public async createStaff(req: Request, res: Response): Promise<void> {
         .eq('email', normalizedEmail)
         .single();
 
-      let role = 'admin';
 
       // If not found in admin, try staff
       if (error || !user) {
@@ -229,7 +229,6 @@ public async createStaff(req: Request, res: Response): Promise<void> {
           .single();
 
         user = staffResult.data;
-        role = 'staff';
 
         if (staffResult.error || !user) {
           res.status(401).json({ error: 'Invalid credentials' });
@@ -255,7 +254,7 @@ public async createStaff(req: Request, res: Response): Promise<void> {
           id: user.id,
           username: user.username,
           email: user.email,
-          role: role,
+          role: user.role,
         },
       });
 
