@@ -4,7 +4,7 @@ import cloudinary from '../lib/cloudinary';
 
 interface InventoryItem {
     id: number;
-    user_id: string;
+    user_id: number;
     productName: string;
     SKU: string;
     quantity: number;
@@ -84,28 +84,35 @@ class InventoryController {
     }
 
     public async getItems(req: Request, res: Response): Promise<void> {
-        try {
-            const itemId = req.params.id;
-            // Fetch items from the Inventory table
-            const { data, error } = await supabase
-                .from('Inventory')
-                .select('*')
+    try {
 
-            if (error) {
-                console.error('Error fetching items:', error);
-                res.status(500).json({ error: 'Failed to fetch items' });
-                return;
-            }
+        const userID = (req as any).user?.id;
 
-
-
-            res.status(200).json({ items: data });
-
-        } catch (error: any) {
-            console.error('Error in getItems:', error);
-            res.status(500).json({ error: 'Internal server error' });
+        if (!userID) {
+            res.status(400).json({ error: 'Missing user_id in request parameters' });
+            return;
         }
+
+        console.log(`Fetching items for user_id: ${userID}`);
+
+        const { data, error } = await supabase
+            .from('Inventory')
+            .select('*')
+            .eq('user_id', userID);
+
+        if (error) {
+            console.error('Error fetching items:', error);
+            res.status(500).json({ error: 'Failed to fetch items' });
+            return;
+        }
+
+        res.status(200).json({ items: data });
+    } catch (error: any) {
+        console.error('Error in getItems:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
+}
+
 
     public async updateQuantity(req: Request, res: Response): Promise<void> {
             try {

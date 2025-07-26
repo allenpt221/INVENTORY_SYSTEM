@@ -61,6 +61,65 @@ class AuthService {
     });
   }
 
+public async createStaff(req: Request, res: Response): Promise<void> {
+    try {
+        const adminId = (req as any).user?.id;
+        const { username, email, password }: SignUpData = req.body;
+
+        if (!adminId) {
+            res.status(401).json({ error: "Unauthorized" });
+            return
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if email already exists
+        const { data: existUser } = await supabase
+            .from('staffAuthentication')
+            .select('email')
+            .eq('email', normalizedEmail)
+            .single();
+
+        if (existUser) {
+            res.status(409).json({ error: 'User with this email already exists' });
+            return
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
+
+        // Insert staff
+        const { error } = await supabase
+            .from('staffAuthentication')
+            .insert([{
+                username,
+                email: normalizedEmail,
+                password: hashedPassword,
+                admin_id: adminId
+            }]);
+
+        if (error) {
+            console.error('Supabase error:', error);
+            res.status(500).json({ error: 'Failed to create user' });
+            return
+        }
+
+         res.status(201).json({
+            message: 'User created successfully',
+            data: {
+                username,
+                email: normalizedEmail
+            }
+        });
+
+    } catch (error: any) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error'})
+        return
+    }
+}
+
+
   public async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
 
@@ -115,7 +174,6 @@ class AuthService {
           username,
           email: email.trim().toLowerCase(),
           password: hashedPassword,
-          role: 'staff',
           created_at: new Date().toISOString(),
         }])
         .select()
@@ -151,38 +209,53 @@ class AuthService {
         return;
       }
 
-      // Get user from database
-      const { data: user, error } = await supabase
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // First, try to find user in admin table
+      let { data: user, error } = await supabase
         .from('authentication')
         .select('*')
-        .eq('email', email.trim().toLowerCase())
+        .eq('email', normalizedEmail)
         .single();
 
+      let role = 'admin';
+
+      // If not found in admin, try staff
       if (error || !user) {
-        // Don't reveal whether user exists for security
-        res.status(401).json({ error: 'Invalid credentials' });
-        return;
+        const staffResult = await supabase
+          .from('staffAuthentication')
+          .select('*')
+          .eq('email', normalizedEmail)
+          .single();
+
+        user = staffResult.data;
+        role = 'staff';
+
+        if (staffResult.error || !user) {
+          res.status(401).json({ error: 'Invalid credentials' });
+          return;
+        }
       }
 
-      // Verify password
+      // Validate password
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
         res.status(401).json({ error: 'Invalid credentials' });
         return;
       }
 
-      // Generate tokens
+      // Generate token & set cookies
       const tokens = this.generateToken(user.id);
       this.setCookies(res, tokens);
 
-      // Return user data (excluding sensitive information)
+      // Return response
       res.status(200).json({
         message: 'Login successful',
         user: {
           id: user.id,
           username: user.username,
           email: user.email,
-          role: user.role,
+          role: role,
         },
       });
 
@@ -191,6 +264,7 @@ class AuthService {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
+
 
   // Add these additional methods for a complete auth service
   public async logOut(req: Request,res: Response): Promise<void> {
