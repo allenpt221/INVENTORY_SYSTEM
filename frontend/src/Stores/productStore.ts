@@ -40,7 +40,7 @@ interface productState {
     deleteProduct: (id: number) => void;
     updateStock: (id: number, quantity: number) => void;
     updateProduct: (productId: ProductUpdatePayload) => void;
-    productSearch: (search: string) => void;
+    productSearch: (query: string) => void;
 }
 
 
@@ -112,9 +112,9 @@ export const productStore = create<productState>((set, get) => ({
         }
     },
 
-    productSearch: async (search: string) => {
+    productSearch: async (query: string) => {
     try {
-      const res = await axios.get(`inventory/search?q=${encodeURIComponent(search)}`);
+      const res = await axios.get(`inventory/search?q=${encodeURIComponent(query)}`);
       set({ products: res.data.results });
     } catch (error) {
       console.error('Error searching products:', error);

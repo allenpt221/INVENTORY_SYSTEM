@@ -181,7 +181,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 space-y-4 h-full">
           {[
             { name: "productName", label: "Product" },
             { name: "SKU", label: "Stock Keeping Unit" },
