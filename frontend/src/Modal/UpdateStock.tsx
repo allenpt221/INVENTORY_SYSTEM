@@ -13,11 +13,13 @@ export function UpdateStock({ isOpen, isClose, updatedStock, updateStock }: Stoc
   if (!isOpen) return null;
 
   const [quantity, setQuantity] = useState<number>(0);
+  const [initialQuantity, setInitialQuantity] = useState<number>(0);
 
   useEffect(() => {
-    const initialQuantity = updatedStock();
-    if (initialQuantity !== null) {
-      setQuantity(initialQuantity);
+    const value = updatedStock();
+    if (value !== null) {
+      setQuantity(value);
+      setInitialQuantity(value);
     }
   }, [updatedStock]);
 
@@ -26,6 +28,10 @@ export function UpdateStock({ isOpen, isClose, updatedStock, updateStock }: Stoc
   };
 
   const handleSubmit = () => {
+    if (quantity === initialQuantity) {
+    // Prevent submission if there's no change
+    return;
+  }
     updateStock(quantity); // properly typed and passed
     isClose();
   };
@@ -65,10 +71,15 @@ export function UpdateStock({ isOpen, isClose, updatedStock, updateStock }: Stoc
 
           <button
             type="submit"
-            className="float-right bg-black text-white px-4 py-2 rounded hover:bg-black/80 font-medium cursor-pointer"
+            disabled={quantity === initialQuantity}
+            className={`float-right px-4 py-2 rounded font-medium cursor-pointer 
+              ${quantity === initialQuantity
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black'}
+            `}
           >
             Update
-          </button>
+          </button> 
         </form>
       </motion.div>
     </div>
