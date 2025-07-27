@@ -1,9 +1,7 @@
 import {
   Calendar,
-  Home,
   Inbox,
   LogOutIcon,
-  User2,
   ChevronUp,
   Sun,
   Moon,
@@ -39,12 +37,12 @@ type AppSidebarProps = {
   DarkMode: Boolean;
   toggleDarkMode: () => void;
   role?: string;
+  profile?: string;
 };
 
 const items = [
-  { title: "Home", icon: Home, url: "/home" },
+  { title: "Products", icon: Calendar, url: "/" },
   { title: "Inventory", icon: Inbox, url: "/inventory" },
-  { title: "Products", icon: Calendar, url: "/products" },
   { title: "transaction", icon: ArrowRightLeft, url: "/transaction" },
   { title: "dashboard", icon: LayoutDashboard, url: "/dashboard", requiresAdmin: true },
 ];
@@ -68,6 +66,7 @@ export function AppSidebar({
   toggleDarkMode,
   role,
   createstaff,
+  profile,
 }: AppSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -91,7 +90,11 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredItems.map((item) => {
-                const isActive = location.pathname.startsWith(item.url);
+                const isActive =
+                item.url === "/"
+                  ? location.pathname === "/"
+                  : location.pathname.startsWith(item.url);
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <Link
@@ -118,8 +121,8 @@ export function AppSidebar({
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="cursor-pointer">
-                <div className="flex items-center w-full gap-2 px-2 py-2 rounded hover:bg-accent cursor-pointer">
-                  <User2 size={15}/>
+                <div className="flex items-center w-full gap-2 px-1 py-2 rounded hover:bg-accent cursor-pointer">
+                  <img src={profile} alt="error load image" className="w-5 h-full rounded-full" /> 
                   <span className="text-sm">{email}</span>
                   <ChevronUp className="ml-auto" />
                 </div>

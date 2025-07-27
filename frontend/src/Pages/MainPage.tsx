@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import { authUserStore } from "@/Stores/authStore";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Outlet } from "react-router-dom";
+import { useTheme } from "@/components/ThemProvider";
+import { CreateStaff } from "@/Modal/CreateStaff";
+import { productStore } from "@/Stores/productStore";
 import {
   Alert,
   AlertTitle,
@@ -10,10 +15,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { Outlet } from "react-router-dom";
-import { useTheme } from "@/components/ThemProvider";
-import { CreateStaff } from "@/Modal/CreateStaff";
 
 
 
@@ -21,6 +22,10 @@ import { CreateStaff } from "@/Modal/CreateStaff";
 export function MainPage() {
   const user = authUserStore((state) => state.user);
   const logout = authUserStore((state) => state.logout);
+
+  const getProducts = productStore((state) => state.getProducts);
+  
+
   const justLoggedIn = authUserStore((state) => state.justLoggedIn);
   const setJustLoggedIn = authUserStore((state) => state.setJustLoggedIn);
   const [showAlert, setShowAlert] = useState<boolean>(false);
@@ -29,7 +34,6 @@ export function MainPage() {
   const { theme, setTheme } = useTheme();
   const [Istheme, setIsTheme] = useState<boolean>(false);
 
-;
 
   const toggleDarkMode = () => {
     if (theme === "dark") {
@@ -42,6 +46,10 @@ export function MainPage() {
   };
 
   useEffect(() => {
+    getProducts();
+  }, [getProducts]);
+
+  useEffect(() => {
     if (justLoggedIn && user) {
       setShowAlert(true);
       const timeout = setTimeout(() => {
@@ -52,12 +60,22 @@ export function MainPage() {
     }
   }, [justLoggedIn, user]);
 
+  
+  console.log(user)
 
 
   return (
     <div className="flex h-screen relative">
       <SidebarProvider>
-        <AppSidebar createstaff={() => setOpenSignup(true)} role={user?.role} DarkMode={Istheme} toggleDarkMode={toggleDarkMode} logout={logout} email={user?.email} />
+        <AppSidebar 
+        createstaff={() => setOpenSignup(true)} 
+        role={user?.role} 
+        DarkMode={Istheme} 
+        toggleDarkMode={toggleDarkMode} 
+        logout={logout} 
+        email={user?.email} 
+        profile={user?.image}
+        />
         <main className="flex-1 p-4 w-full overflow-hidden">
           <SidebarTrigger />
           {showAlert && (
