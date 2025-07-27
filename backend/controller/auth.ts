@@ -16,6 +16,7 @@ interface LoginCredentials {
   email: string;
   password: string;
   role: string
+  image?:string;
 }
 
 interface SignUpData {
@@ -222,7 +223,7 @@ class AuthService {
 
   public async logIn(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password, role }: LoginCredentials = req.body;
+      const { email, password }: LoginCredentials = req.body;
 
       if (!email || !password) {
         res.status(400).json({ error: 'Email and password are required' });
@@ -274,6 +275,7 @@ class AuthService {
           username: user.username,
           email: user.email,
           role: user.role,
+          image: user.image
         },
       });
 
