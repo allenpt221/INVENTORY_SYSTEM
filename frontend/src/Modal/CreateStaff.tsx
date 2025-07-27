@@ -47,7 +47,7 @@ export function CreateStaff({ isOpen, isClose }: StaffSignUpProps) {
       label: "Email",
       name: "email",
       type: "email",
-      placeholder: "johndoe@example.com",
+      placeholder: "me@example.com",
     },
     {
       label: "Password",
@@ -116,7 +116,7 @@ export function CreateStaff({ isOpen, isClose }: StaffSignUpProps) {
       >
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Create Staff</h2>
+          <h2 className="text-lg font-semibold">Register Staff</h2>
           <button
             onClick={isClose}
             aria-label="Close modal"

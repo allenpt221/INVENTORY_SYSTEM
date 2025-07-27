@@ -6,6 +6,7 @@ type User = {
   username: string;
   email: string;
   role: string;
+  image: string;
 };
 
 export type signupStaff = {
@@ -13,6 +14,7 @@ export type signupStaff = {
   email: string;
   password: string;
   confirmPassword?: string;
+  image?: string;
 }
 
 interface UserState {
@@ -81,6 +83,7 @@ export const authUserStore = create<UserState>((set, get) => ({
     try {
       const res = await axios.get('auth/getprofile');
       set({ user: res.data, checkingAuth: false });
+      console.log(res.data)
     } catch (error: any) {
       console.log(error.message);
       set({ checkingAuth: false, user: null });

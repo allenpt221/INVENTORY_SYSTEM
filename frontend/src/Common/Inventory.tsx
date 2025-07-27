@@ -58,7 +58,6 @@ export function Inventory() {
 
   const rawProducts = productStore((state) => state.products) ?? [];
   const deleteProduct = productStore((state) => state.deleteProduct);
-  const getProducts = productStore((state) => state.getProducts);
   const user = authUserStore((state) => state.user);
   const updateProductStock = productStore((state) => state.updateStock);
 
@@ -105,9 +104,6 @@ export function Inventory() {
   };
 
   // fetch also the product here to prevent the reload relaod the website
-  React.useEffect(() => {
-    getProducts();
-  }, [getProducts]);
 
   // map off the product here using the reactUsememo
   const products = React.useMemo(() => {
