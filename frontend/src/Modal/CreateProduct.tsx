@@ -60,7 +60,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   }));
 
   // Remove error for the field if value is not empty
-  if (name === "barcode" && value.trim() !== "") {
+  if (value.trim() !== "") {
     setError((prev) => {
       const updatedError = { ...prev };
       delete updatedError[name];
@@ -115,7 +115,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if(!registered.SKU){
         newErrors.SKU = "Stock Keeping Unit is required";
       }
-      if(!registered.quantity){
+      if (registered.quantity === undefined || registered.quantity <= 0){
         newErrors.quantity = "Quantity is required";
       }
       if(!registered.brand){
@@ -158,6 +158,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     }
   };
 
+  const getValue = (key: keyof ProductInput) => registered[key];
+
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-end z-50" onClick={isClose} role="dialog">
       <motion.div
@@ -165,7 +167,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         animate={{ width: panelWidth }}
         exit={{ width: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white h-full shadow-lg sm:overflow-y-hidden overflow-y-auto dark:bg-black border"
+        className="bg-white h-full shadow-lg overflow-y-auto dark:bg-black border"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center py-2 border-b-2 mx-5">
@@ -196,7 +198,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 step={name === "price" ? "0.01" : undefined}
                 placeholder={`Enter ${label}`}
                 className="rounded-md"
-                value={(registered as any)[name]}
+                value={getValue(name as keyof ProductInput)}
                 onChange={handleChange}
               />
               {error[name] && (
@@ -264,7 +266,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           {/* Buttons */}
             <button
               type="submit"
-              className="mt-5 w-full bg-black text-white py-2 rounded-md hover:bg-black/70 cursor-pointer transition dark:text-black dark:bg-white"
+              className="mt-4 w-full bg-black text-white py-2 rounded-md hover:bg-black/70 cursor-pointer transition dark:text-black dark:bg-white"
             >
               Register Product
             </button>
