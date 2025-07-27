@@ -5,6 +5,7 @@ import { supabase } from '../supabase/supa-client';
 
 interface TokenPayload {
   id: string;
+  admin_id?: string;
 }
 
 interface AuthTokens {
@@ -38,10 +39,10 @@ class AuthService {
     this.jwtSecret = process.env.JWT_SECRET;
   }
 
-  private generateToken(userId: string): AuthTokens {
+  private generateToken(id: string, admin_id?: string): AuthTokens {
     return {
-      accessToken: jwt.sign({ id: userId }, this.jwtSecret, { expiresIn: this.ACCESS_TOKEN_EXPIRY }),
-      refreshToken: jwt.sign({ id: userId }, this.jwtSecret, { expiresIn: this.REFRESH_TOKEN_EXPIRY })
+      accessToken: jwt.sign({ id, admin_id }, this.jwtSecret, { expiresIn: this.ACCESS_TOKEN_EXPIRY }),
+      refreshToken: jwt.sign({ id, admin_id}, this.jwtSecret, { expiresIn: this.REFRESH_TOKEN_EXPIRY })
     };
   }
 
@@ -264,18 +265,19 @@ class AuthService {
       }
 
       // Generate token & set cookies
-      const tokens = this.generateToken(user.id);
+      const tokens = this.generateToken(user.id, user.admin_id)
       this.setCookies(res, tokens);
 
       // Return response
       res.status(200).json({
         message: 'Login successful',
         user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          image: user.image
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+        admin_id: user.admin_id || null
         },
       });
 
@@ -296,21 +298,29 @@ class AuthService {
   public async refreshToken(req: Request, res: Response): Promise<void> {
     try {
       const refreshToken = req.cookies.refreshToken;
+
       if (!refreshToken) {
         res.status(401).json({ error: 'Refresh token required' });
         return;
       }
 
       const decoded = jwt.verify(refreshToken, this.jwtSecret) as TokenPayload;
-      const newTokens = this.generateToken(decoded.id);
+
+      if (!decoded?.id) {
+        res.status(401).json({ error: 'Invalid token payload' });
+        return;
+      }
+
+      const newTokens = this.generateToken(decoded.id, decoded.admin_id);
       this.setCookies(res, newTokens);
 
       res.status(200).json({ message: 'Token refreshed successfully' });
     } catch (error: any) {
-      console.error('Token refresh error:', error);
+      console.error('Token refresh error:', error.message || error);
       res.status(401).json({ error: 'Invalid refresh token' });
     }
   }
+
 
   public async getProfile (req: Request, res: Response): Promise<void> {
     try {
