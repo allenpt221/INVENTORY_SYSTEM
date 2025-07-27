@@ -84,34 +84,38 @@ class InventoryController {
     }
 
     public async getItems(req: Request, res: Response): Promise<void> {
-    try {
+        try {
+            const user = req.user;  
 
-        const userID = (req as any).user?.id;
-
-        if (!userID) {
-            res.status(400).json({ error: 'Missing user_id in request parameters' });
+            if (!user) {
+            res.status(401).json({ error: "User not authenticated" });
             return;
-        }
+            }
 
-        console.log(`Fetching items for user_id: ${userID}`);
+            const userIdToQuery = user.role === 'staff' ? user.admin_id : user.id;
 
-        const { data, error } = await supabase
-            .from('Inventory')
-            .select('*')
-            .eq('user_id', userID);
-
-        if (error) {
-            console.error('Error fetching items:', error);
-            res.status(500).json({ error: 'Failed to fetch items' });
+            if (!userIdToQuery) {
+            res.status(400).json({ error: "Cannot determine user context" });
             return;
-        }
+            }
 
-        res.status(200).json({ items: data });
-    } catch (error: any) {
-        console.error('Error in getItems:', error);
-        res.status(500).json({ error: 'Internal server error' });
+            const { data, error } = await supabase
+            .from("Inventory")
+            .select("*")
+            .eq("user_id", userIdToQuery);
+
+            if (error) {
+            console.error("Error fetching inventory:", error);
+            res.status(500).json({ error: "Failed to fetch inventory" });
+            return;
+            }
+
+            res.status(200).json({ items: data });
+        } catch (error: any) {
+            console.error("Error in getItems:", error);
+            res.status(500).json({ error: "Internal server error" });
+        }
     }
-}
 
 
     public async updateQuantity(req: Request, res: Response): Promise<void> {
@@ -226,8 +230,7 @@ class InventoryController {
             .or(`
                 productName.ilike.%${query}%,
                 SKU.ilike.%${query}%,
-                location.ilike.%${query}%,
-                supplier.ilike.%${query}%,
+                brand.ilike.%${query}%,
                 category.ilike.%${query}%
             `.replace(/\s+/g, '')
         );
