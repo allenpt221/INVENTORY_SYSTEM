@@ -220,7 +220,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               <button
                 type="button"
                 onClick={handleGenerateBarcode}
-                className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
+                className="px-3 py-1 rounded-md bg-black text-white hover:bg-gray-200 text-sm dark:bg-white dark:border dark:text-black font-medium"
               >
                 Auto
               </button>
@@ -264,7 +264,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           {/* Buttons */}
             <button
               type="submit"
-              className="mt-5 w-full bg-black text-white py-2 rounded-md hover:bg-black/70 cursor-pointer transition"
+              className="mt-5 w-full bg-black text-white py-2 rounded-md hover:bg-black/70 cursor-pointer transition dark:text-black dark:bg-white"
             >
               Register Product
             </button>

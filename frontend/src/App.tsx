@@ -50,7 +50,7 @@ function App() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <div className="relative bg-background text-foreground h-screen">
       {/* 🌙 Dark/Light Mode Toggle */}
       {!user && mounted && (
         <button
@@ -80,17 +80,16 @@ function App() {
           {/* Protected Routes (nested inside MainPage layout) */}
           {user && (
             <Route path="/" element={<MainPage />}>
-              <Route index element={<Navigate to="/" replace />} />
+              <Route index element={<Product />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/transaction" element={<Transaction />} />
-              <Route path="/product" element={<Product />} />
               <Route
                 path="/dashboard"
                 element={
                   user?.role === "superAdmin" ? (
                     <Dashboard />
                   ) : (
-                    <Navigate to="/inventory" />
+                    <Navigate to="/" />
                   )
                 }
               />

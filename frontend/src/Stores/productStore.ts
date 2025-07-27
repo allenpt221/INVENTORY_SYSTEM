@@ -12,7 +12,8 @@ export type Products = {
     category: string;
     price: number;
     total: number;
-    image?: string | File;
+    image?: string;
+    descp?: string;
 }
 
 export type ProductInput = {
@@ -25,6 +26,8 @@ export type ProductInput = {
     image?: string; 
     price: number;
     total?: number;
+    descp?: string;
+
 };
 
 export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
@@ -37,6 +40,7 @@ interface productState {
     deleteProduct: (id: number) => void;
     updateStock: (id: number, quantity: number) => void;
     updateProduct: (productId: ProductUpdatePayload) => void;
+    productSearch: (search: string) => void;
 }
 
 
@@ -107,6 +111,15 @@ export const productStore = create<productState>((set, get) => ({
             console.error("Failed to update product:", error);
         }
     },
+
+    productSearch: async (search: string) => {
+    try {
+      const res = await axios.get(`inventory/search?q=${encodeURIComponent(search)}`);
+      set({ products: res.data.results });
+    } catch (error) {
+      console.error('Error searching products:', error);
+    }
+  },
 
 
 }));

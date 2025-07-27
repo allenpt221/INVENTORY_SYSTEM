@@ -7,6 +7,7 @@ type User = {
   email: string;
   role: string;
   image: string;
+  admin_id?: string | null;
 };
 
 export type signupStaff = {
@@ -61,6 +62,7 @@ export const authUserStore = create<UserState>((set, get) => ({
     try {
       const res = await axios.post('auth/login', { email, password });
       set({ user: res.data.user, loading: false, justLoggedIn: true });
+      console.log(res.data.user);
       return true
     } catch (error: any) {
       console.error('Invalid credentials:', error);
@@ -83,7 +85,6 @@ export const authUserStore = create<UserState>((set, get) => ({
     try {
       const res = await axios.get('auth/getprofile');
       set({ user: res.data, checkingAuth: false });
-      console.log(res.data)
     } catch (error: any) {
       console.log(error.message);
       set({ checkingAuth: false, user: null });

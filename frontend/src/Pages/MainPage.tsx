@@ -61,11 +61,10 @@ export function MainPage() {
   }, [justLoggedIn, user]);
 
   
-  console.log(user)
 
 
   return (
-    <div className="flex h-screen relative">
+    <div className="flex relative">
       <SidebarProvider>
         <AppSidebar 
         createstaff={() => setOpenSignup(true)} 
@@ -81,7 +80,7 @@ export function MainPage() {
           {showAlert && (
             <Alert
               variant="default"
-              className="absolute w-[40rem] h-[4rem] top-5 right-[35rem]"
+              className="absolute w-[40rem] z-10 h-[4rem] top-5 right-[35rem]"
             >
               <CheckCircle2Icon className="h-5 w-5 text-green-500 mt-1 shrink-0" />
               <div>
