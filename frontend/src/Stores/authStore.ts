@@ -2,13 +2,18 @@ import axios from '../lib/axios';
 import { create } from 'zustand';
 
 type User = {
-  id: string;
+  id?: number;
   username: string;
   email: string;
-  role: string;
+  role?: string;
   image: string;
-  admin_id?: string | null;
+  admin_id?: number | null;
+  staff_id?: number
 };
+
+
+export type userUpdateLoad = User;
+
 
 export type signupStaff = {
   username: string;

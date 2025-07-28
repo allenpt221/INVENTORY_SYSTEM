@@ -15,6 +15,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Account } from "@/Modal/Account";
 
 
 
@@ -30,9 +31,11 @@ export function MainPage() {
   const setJustLoggedIn = authUserStore((state) => state.setJustLoggedIn);
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [openSignup, setOpenSignup] = useState<boolean>(false);
-
+  const [openAccount, setOpenAcount] = useState<boolean>(false);
   const { theme, setTheme } = useTheme();
   const [Istheme, setIsTheme] = useState<boolean>(false);
+
+  console.log(user);
 
 
   const toggleDarkMode = () => {
@@ -67,6 +70,7 @@ export function MainPage() {
     <div className="flex relative">
       <SidebarProvider>
         <AppSidebar 
+        account={() => setOpenAcount(true)}
         createstaff={() => setOpenSignup(true)} 
         role={user?.role} 
         DarkMode={Istheme} 
@@ -94,6 +98,15 @@ export function MainPage() {
           <Outlet />
         </main>
       </SidebarProvider>
+
+
+      {openAccount && (
+        <Account 
+          isOpen={true}
+          isClose={() => setOpenAcount(false)}
+          userData={user}
+        />
+      )}
 
       {openSignup && (
         <CreateStaff 

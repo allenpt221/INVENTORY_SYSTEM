@@ -38,6 +38,7 @@ type AppSidebarProps = {
   toggleDarkMode: () => void;
   role?: string;
   profile?: string;
+  account: () => void;
 };
 
 const items = [
@@ -67,6 +68,7 @@ export function AppSidebar({
   role,
   createstaff,
   profile,
+  account
 }: AppSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -133,7 +135,9 @@ export function AppSidebar({
                   isMobile ? "w-[15rem] max-w-xs" : "w-auto"
                 }`}
               >
-                <DropdownMenuItem className="cursor-pointer">Account</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={account}>
+                  Account
+                  </DropdownMenuItem>
                 {role === "manager" && (
                   <DropdownMenuItem className="cursor-pointer"
                   onClick={createstaff}>Register Staff</DropdownMenuItem>
