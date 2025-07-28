@@ -11,6 +11,9 @@ router.post('/logout', authService.logOut.bind(authService));
 router.post('/refresh', authService.refreshToken.bind(authService));
 router.get('/', authService.getAllUsers.bind(authService));
 
+router.put('/account', protectRoute, authService.updateAccount.bind(authService));
+
+
 router.get('/getprofile', protectRoute,  authService.getProfile.bind(authService));
 
 
