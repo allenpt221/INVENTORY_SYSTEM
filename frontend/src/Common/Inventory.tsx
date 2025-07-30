@@ -48,6 +48,7 @@ import { AnimatePresence } from "framer-motion";
 import { UpdateStock } from "@/Modal/UpdateStock";
 import { UpdateProduct } from "@/Modal/UpdateProduct";
 import { ConfirmationModal } from "@/Modal/ConfirmationModal";
+import Barcode from "@/Modal/Barcode";
 
 export function Inventory() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -69,6 +70,10 @@ export function Inventory() {
   
   const [selectedProductDelete, setSelectedProductDelete] = React.useState<number | null>(null);
   const [showDeletion, setShowDeletion] = React.useState<boolean>(false);
+
+  const [selectedbarcodeId, setSelectedBarcodeId] = React.useState<number | null>(null);
+  const [barcodeModal, setBarcodeModal] = React.useState<boolean>(false);
+
 
 
    const handleDelete = (id: number) => {
@@ -102,6 +107,11 @@ export function Inventory() {
     setSelectId(id);
     setIsUpdateOpen(true);
   };
+
+  const handleBarcode = (id: number) => {
+    setSelectedBarcodeId(id);
+    setBarcodeModal(true);
+  }
 
   // fetch also the product here to prevent the reload relaod the website
 
@@ -298,6 +308,9 @@ export function Inventory() {
               <DropdownMenuItem onClick={() => handleUpdateStock(product.id)}>
                 Update Stock
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleBarcode(product.id)}>
+                Show Barcode
+              </DropdownMenuItem>
               {user?.role === "manager" && (
               <>
               <DropdownMenuSeparator />
@@ -483,6 +496,14 @@ export function Inventory() {
 
           />
         )}
+        {barcodeModal && selectedbarcodeId !== null && (
+          <Barcode
+            isOpen={true}
+            isClose={() => setBarcodeModal(false)}
+            productId={selectedbarcodeId}
+          />
+        )}
+
         {showDeletion && (
         <ConfirmationModal
           title="Delete Product?"

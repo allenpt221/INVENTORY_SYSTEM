@@ -33,6 +33,7 @@ export type ProductInput = {
 export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
 
 interface productState {
+    loading: boolean;
     products: Products[];
     setProduct: (products: Products[]) => void;
     getProducts: () => void;
@@ -46,12 +47,13 @@ interface productState {
 
 export const productStore = create<productState>((set, get) => ({
     products: [],
+    loading: true,
     setProduct: (products) => set({products}),
 
     getProducts: async (): Promise<void> => {
         try {
             const res = await axios.get('/inventory');
-            set({ products:res.data.items });
+            set({ products:res.data.items, loading: false});
         } catch (error: any) {
             console.error('Failed fetching data:', error);    
         }

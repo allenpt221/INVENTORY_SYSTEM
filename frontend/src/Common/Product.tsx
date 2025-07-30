@@ -11,6 +11,7 @@ export function Product() {
   const productSearch = productStore((state) => state.productSearch);
   const products = productStore((state) => state.products);
   const getAllProducts = productStore((state) => state.getProducts);
+  const loading = productStore((state) => state.loading);
 
   const ITEMS_PER_PAGE = 15;
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
@@ -80,61 +81,81 @@ export function Product() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paginatedProducts.map((prod, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-3 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
-            >
-              {/* Product Image */}
-              <div className="relative w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden">
-                <img
-                  src={prod.image}
-                  alt={prod.productName || "Product"}
-                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://via.placeholder.com/200?text=No+Image";
-                  }}
-                />
-              </div>
-
-              {/* Product Info */}
-              <div className="flex flex-col gap-2 mt-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-medium text-gray-900 dark:text-white text-xs">
-                    {prod.productName}
-                  </h3>
-                  <p className="text-sm font-semibold text-primary whitespace-nowrap ml-2">
-                    ₱{formatNumberPrice(prod.price)}
+          {loading ? (
+            Array.from({ length: 15 }).map((_, index) => (
+						<div
+							key={index}
+							className="w-full shrink-0 shadow-lg border p-4 rounded animate-pulse"
+						>
+							<div className="w-full h-40 bg-gray-200 rounded mb-4" />
+							<div className="h-4 bg-gray-200 rounded mb-2 w-2/3" />
+							<div className="h-3 bg-gray-200 rounded w-full" />
+						</div>
+						))
+           ) : paginatedProducts.length === 0 ? (
+              <p className="text-center col-span-full text-gray-500 dark:text-gray-400">
+                No products found.
+              </p>
+           ) : (
+            paginatedProducts.map((prod) => (
+              <div
+                key={prod.id}
+                className="flex flex-col gap-3 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
+              >
+                {/* Product Image */}
+                <div className="relative w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden"
+                  style={{
+                    background: "linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)",
+                  }}>
+                  <img
+                    src={prod.image}
+                    alt={prod.productName || "Product"}
+                    className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://via.placeholder.com/200?text=No+Image";
+                    }}
+                  />
+                </div>
+  
+                {/* Product Info */}
+                <div className="flex flex-col gap-2 mt-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-medium text-gray-900 dark:text-white text-xs">
+                      {prod.productName}
+                    </h3>
+                    <p className="text-sm font-semibold text-primary whitespace-nowrap ml-2">
+                      ₱{formatNumberPrice(prod.price)}
+                    </p>
+                  </div>
+  
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                    {prod.descp || "No description available"}
                   </p>
-                </div>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                  {prod.descp || "No description available"}
-                </p>
-
-                <div className="flex justify-between items-center mt-2 text-sm">
-                  <span className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Brand:</span>
-                    <span className="text-xs">
-                      {capitalizeLetter(prod.brand)}
+  
+                  <div className="flex justify-between items-center mt-2 text-sm">
+                    <span className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
+                      <span className="font-medium">Brand:</span>
+                      <span className="text-xs">
+                        {capitalizeLetter(prod.brand)}
+                      </span>
                     </span>
-                  </span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      prod.quantity > 0
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                    }`}
-                  >
-                    {prod.quantity > 0
-                      ? `${prod.quantity} in stock`
-                      : "Out of stock"}
-                  </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        prod.quantity > 0
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                      }`}
+                    >
+                      {prod.quantity > 0
+                        ? `${prod.quantity} in stock`
+                        : "Out of stock"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Pagination Controls */}
