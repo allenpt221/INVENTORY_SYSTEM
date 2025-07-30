@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../supabase/supa-client';
 import cloudinary from '../lib/cloudinary';
+import removeBackgroundFromImage from '../lib/removeBackgroundFromImage';
 
 interface InventoryItem {
     id: number;
@@ -30,12 +31,28 @@ class InventoryController {
 
             const total = Parseprice * ParseQuantity
 
-            let cloudinaryResponse = null;
+            let imageUrl = "";
+
+            try {
+            if (image && image.startsWith("data:image")) {
+
+                // using this function is to remove directly the bg of the image
+                const transparentImage = await removeBackgroundFromImage(image); 
 
 
-            if(image){
-                cloudinaryResponse = await cloudinary.uploader.upload(image, { folder: "products"});
+                const result = await cloudinary.uploader.upload(transparentImage, {
+                folder: "products",
+            });
+                imageUrl = result.secure_url;
             }
+            } catch (error) {
+            console.warn("Background removal failed, uploading original image.");
+            const fallback = await cloudinary.uploader.upload(image, {
+                folder: "products",
+            });
+            imageUrl = fallback.secure_url;
+            }
+
 
             if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category || !price) {
                 res.status(400).json({ error: 'All fields are required' });
@@ -61,7 +78,7 @@ class InventoryController {
                 category,
                 price: Parseprice,
                 total,
-                image: cloudinaryResponse?.secure_url ?? "",
+                image: imageUrl,
                 created_at: new Date().toISOString(),
             }]).select()
             .single();
