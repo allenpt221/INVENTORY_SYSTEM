@@ -371,7 +371,7 @@ public async updateAccount(req: Request, res: Response): Promise<void> {
       .from(tableToUpdate)
       .update(updateFields)
       .eq(keyColumn, keyValue)
-      .select("username, email, image");
+      .select("username, email, image, role");
 
     if (error) {
       console.error(`Supabase ${tableToUpdate} update error:`, error);
@@ -379,22 +379,9 @@ public async updateAccount(req: Request, res: Response): Promise<void> {
       return;
     }
 
-     const { data: roleData, error: roleError } = await supabase
-      .from(tableToUpdate)
-      .select("role")
-      .eq(keyColumn, keyValue)
-      .single();
-
-    if (roleError) {
-      console.error("Failed to fetch role:", roleError);
-      res.status(500).json({ error: "Failed to retrieve updated role" });
-      return;
-    }
-
     res.status(200).json({
       message: "Update successfully",
       account: data?.[0],
-      role: roleData.role
     });
 
   } catch (error) {
