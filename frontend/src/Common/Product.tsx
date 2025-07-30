@@ -13,7 +13,7 @@ export function Product() {
   const getAllProducts = productStore((state) => state.getProducts);
   const loading = productStore((state) => state.loading);
 
-  const ITEMS_PER_PAGE = 15;
+  const ITEMS_PER_PAGE = 12;
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
 
   const paginatedProducts = products.slice(
@@ -105,7 +105,7 @@ export function Product() {
                 {/* Product Image */}
                 <div className="relative w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden"
                   style={{
-                    background: "linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)",
+                    background: "dark:linear-gradient(90deg, #111111 10%, #1a1a1a 40%, #2b2b2b 70%, #111111 100%)  linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)",
                   }}>
                   <img
                     src={prod.image}

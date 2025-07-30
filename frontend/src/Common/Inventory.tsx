@@ -360,6 +360,7 @@ export function Inventory() {
     },
   });
 
+
   return (
     <div className="w-full">
       {user?.role === "manager" && (
@@ -420,7 +421,7 @@ export function Inventory() {
         </DropdownMenu>
       </div>
 
-      <div className="w-full border rounded mx-2">
+      <div className="w-full border rounded mx-2 overflow-auto  max-h-[800px]">
         <Table className="lg:min-w-full min-w-[1300px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -439,8 +440,8 @@ export function Inventory() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
+            {table.getFilteredRowModel().rows.length ? (
+              table.getFilteredRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
