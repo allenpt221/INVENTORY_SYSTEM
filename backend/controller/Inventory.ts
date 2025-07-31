@@ -138,6 +138,7 @@ class InventoryController {
     public async updateQuantity(req: Request, res: Response): Promise<void> {
             try {
                 const itemId = req.params.id;
+                const userEmail = req.user?.email;
                 const { quantity }: { quantity: number } = req.body;
 
                 if (typeof quantity !== 'number' || isNaN(quantity)) {
@@ -147,7 +148,7 @@ class InventoryController {
 
                 const { data: item, error: fetchError } = await supabase
                     .from('Inventory')
-                    .select('price')
+                    .select('*')
                     .eq('id', itemId)
                     .single();
 
@@ -174,6 +175,33 @@ class InventoryController {
                     .select('id, quantity, price, total')
                     .single();
 
+
+                const previousStock  = item.quantity;
+
+                if(quantity === previousStock){
+                    res.status(400).json({message: 'No stock changes'});
+                    console.log('No stock change');
+                    return;
+                }
+                
+                const stockStatus = quantity > previousStock ? "increase" : "descrease";
+
+                  const { error: logError } = await supabase.from('after_update_the_stock').insert([
+                        {
+                        productname: item.productName,
+                        stock_status: stockStatus,
+                        stock: quantity,
+                        price: item.price,
+                        total: total,
+                        updateby: userEmail,
+                        created_at: new Date().toISOString(),
+                        },
+                    ]);
+
+                    if (logError) {
+                        throw new Error('Error logging stock change: ' + logError.message);
+                    }
+
                 if (updateError || !updatedItem) {
                     console.error('Update error:', updateError?.message);
                     res.status(500).json({ error: 'Failed to update inventory' });
@@ -185,7 +213,7 @@ class InventoryController {
                 console.error('Server error:', error);
                 res.status(500).json({ error: 'Internal server error' });
             }
-        }
+    }
 
 
 
