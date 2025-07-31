@@ -138,6 +138,7 @@ class InventoryController {
     public async updateQuantity(req: Request, res: Response): Promise<void> {
             try {
                 const itemId = req.params.id;
+                const userId = req.user;
                 const userEmail = req.user?.email;
                 const { quantity }: { quantity: number } = req.body;
 
@@ -145,6 +146,13 @@ class InventoryController {
                     res.status(400).json({ error: 'Quantity must be a valid number' });
                     return;
                 }
+
+                if (!userId) {
+                        res.status(401).json({ error: "User not authenticated" });
+                        return;
+                        }
+
+                const userIdToQuery = userId.role === 'staff' ? userId.admin_id : userId.id;
 
                 const { data: item, error: fetchError } = await supabase
                     .from('Inventory')
@@ -188,6 +196,7 @@ class InventoryController {
 
                   const { error: logError } = await supabase.from('after_update_the_stock').insert([
                         {
+                        userId: userIdToQuery,
                         productname: item.productName,
                         stock_status: stockStatus,
                         stock: quantity,
@@ -320,6 +329,31 @@ class InventoryController {
             res.status(200).json({ message: "Product deleted successfully" });
         } catch (err: any) {
             res.status(500).json({ message: "Unexpected error in deleteProduct", error: err.message });
+        }
+    }
+
+    public async getUpdateLogs(req: Request, res: Response): Promise<void> {
+        try {
+            const user = req.user;
+
+            const userIdToQuery = user?.role === "staff" ? user.admin_id : user?.id;
+
+            const {data, error} = await supabase
+            .from('after_update_the_stock')
+            .select("*")
+            .eq("userId", userIdToQuery);
+
+            if (error) {
+                console.error("Supabase error:", error);
+                res.status(500).json({ error: "Error fetching logs from database" });
+                return;
+            }
+
+            res.status(200).json({success: true, product: data})
+
+        } catch (error) {
+            console.error("Error fetching inventorylogs:", error);
+            res.status(500).json({ error: "Server error while fetching inventorylogs" });
         }
     }
 
