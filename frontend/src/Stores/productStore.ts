@@ -138,7 +138,7 @@ export const productStore = create<productState>((set, get) => ({
             if (newLog) {
             set({
                 products: updatedProducts,
-                Inventorylog: [newLog, ...get().Inventorylog]
+                inventorylog: [newLog, ...get().inventorylog]
             });
             } else {
             set({ products: updatedProducts });
