@@ -35,7 +35,6 @@ export function MainPage() {
   const { theme, setTheme } = useTheme();
   const [Istheme, setIsTheme] = useState<boolean>(false);
 
-  console.log(user);
 
 
   const toggleDarkMode = () => {

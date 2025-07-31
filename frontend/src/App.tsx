@@ -3,7 +3,7 @@ import { Suspense, useEffect, useState, lazy } from "react";
 
 import { authUserStore } from "./Stores/authStore";
 import { MainPage } from "./Pages/MainPage";
-import { Transaction } from "./Common/Transaction";
+import { InventoryLog } from "./Common/InventoryLog";
 import { Dashboard } from "./Common/Dashboard";
 import { Inventory } from "./Common/Inventory";
 import { Product } from "./Common/Product";
@@ -82,11 +82,11 @@ function App() {
             <Route path="/" element={<MainPage />}>
               <Route index element={<Product />} />
               <Route path="/inventory" element={<Inventory />} />
-              <Route path="/transaction" element={<Transaction />} />
+              <Route path="/inventorylog" element={<InventoryLog />} />
               <Route
                 path="/dashboard"
                 element={
-                  user?.role === "superAdmin" ? (
+                  user?.role === "manager" ? (
                     <Dashboard />
                   ) : (
                     <Navigate to="/" />

@@ -51,10 +51,8 @@ export const authUserStore = create<UserState>((set, get) => ({
   // only manager can create staff account
   signupStaff: async(createuser: signupStaff): Promise<void> => {
     try {
-      const res = await axios.post('/auth/signstaff', createuser);
+      await axios.post('/auth/signstaff', createuser);
 
-      console.log("Staff created:", res.data.staff);
-      
     } catch (error: any) {
       const message = error?.response?.data?.error || 'Failed to create staff. Please try again.';
         console.error('Signup error:', message);
@@ -67,7 +65,6 @@ export const authUserStore = create<UserState>((set, get) => ({
     try {
       const res = await axios.post('auth/login', { email, password });
       set({ user: res.data.user, loading: false, justLoggedIn: true });
-      console.log(res.data.user);
       return true
     } catch (error: any) {
       console.error('Invalid credentials:', error);

@@ -103,10 +103,14 @@ export function Inventory() {
   }
 
   // handle the update id and open the modal if it true
-  const handleUpdateStock = (id: number) => {
-    setSelectId(id);
+const handleUpdateStock = (id: number) => {
+  setSelectId(id);
+  // Optional: ensure product is available before showing modal
+  const product = products.find(p => p.id === id);
+  if (product) {
     setIsUpdateOpen(true);
-  };
+  }
+};
 
   const handleBarcode = (id: number) => {
     setSelectedBarcodeId(id);
@@ -440,7 +444,7 @@ export function Inventory() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getFilteredRowModel().rows.length ? (
+            {table.getPaginationRowModel().rows.length ? (
               table.getFilteredRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

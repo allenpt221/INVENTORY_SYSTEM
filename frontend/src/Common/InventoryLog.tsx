@@ -1,5 +1,5 @@
 
-export function Transaction() {
+export function InventoryLog() {
     return (
         <div>
             Transaction

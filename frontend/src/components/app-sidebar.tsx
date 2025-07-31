@@ -44,7 +44,7 @@ type AppSidebarProps = {
 const items = [
   { title: "Products", icon: Calendar, url: "/" },
   { title: "Inventory", icon: Inbox, url: "/inventory" },
-  { title: "transaction", icon: ArrowRightLeft, url: "/transaction" },
+  { title: "Inventory Log", icon: ArrowRightLeft, url: "/inventorylog" },
   { title: "dashboard", icon: LayoutDashboard, url: "/dashboard", requiresAdmin: true },
 ];
 
