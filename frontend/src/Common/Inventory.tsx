@@ -41,6 +41,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
+
 import { productStore, type Products, type ProductUpdatePayload } from "@/Stores/productStore";
 import { authUserStore } from "@/Stores/authStore";
 import { CreateProduct } from "@/Modal/CreateProduct";
@@ -73,6 +76,8 @@ export function Inventory() {
 
   const [selectedbarcodeId, setSelectedBarcodeId] = React.useState<number | null>(null);
   const [barcodeModal, setBarcodeModal] = React.useState<boolean>(false);
+
+  const isLoading = rawProducts.length === 0;
 
 
 
@@ -150,9 +155,13 @@ const handleUpdateStock = (id: number) => {
   };
 
   // capitalized the first letter of each space
-  const  capitalizeLetter = (str: string) => {
-    return str.trim().split('').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join('')
-  }
+  const capitalizeLetter = (str: string) =>
+    str
+      .trim()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
 
   const columns: ColumnDef<Products>[] = [
     {
@@ -444,7 +453,18 @@ const handleUpdateStock = (id: number) => {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getPaginationRowModel().rows.length ? (
+            {isLoading ? (
+              Array.from({ length: 10 }).map((_, idx) => (
+                <TableRow key={`skeleton-${idx}`}>
+                  {Array.from({ length: columns.length }).map((_, colIdx) => (
+                    <TableCell key={colIdx}>
+                      <Skeleton className="h-4 w-full rounded" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) :
+            table.getPaginationRowModel().rows.length ? (
               table.getFilteredRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
