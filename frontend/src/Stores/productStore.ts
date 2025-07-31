@@ -42,12 +42,24 @@ export type ProductInput = {
 
 };
 
+type StockLogs = {
+    user_id?: number;
+    stock_before: number;
+    current_stock: number;
+    total_before: number;
+    current_total: number;
+    before_price: number;
+    current_price: number;
+    created_at: Date;
+}
+
 export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
 
 interface productState {
     loading: boolean;
     products: Products[];
-    Inventorylog: InvetoryLogs[];
+    inventorylog: InvetoryLogs[];
+    stocklog: StockLogs[]
     setProduct: (products: Products[]) => void;
     getProducts: () => void;
     createProduct: (registedProduct: ProductInput) => void;
@@ -61,7 +73,8 @@ interface productState {
 
 export const productStore = create<productState>((set, get) => ({
     products: [],
-    Inventorylog: [],
+    inventorylog: [],
+    stocklog: [],
     loading: true,
     setProduct: (products) => set({products}),
 
@@ -78,9 +91,10 @@ export const productStore = create<productState>((set, get) => ({
         try {
             const res = await axios.get('/inventory/updatelog');
 
-            set({Inventorylog: res.data.log})
+            set({inventorylog: res.data.updateLogs})
+            set({stocklog: res.data.stocklogs});
         } catch (error) {
-            
+            console.error("Error fetching logs:", error);
         }
     },
 
