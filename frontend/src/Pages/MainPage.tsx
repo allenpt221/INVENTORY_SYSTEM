@@ -25,6 +25,8 @@ export function MainPage() {
   const logout = authUserStore((state) => state.logout);
 
   const getProducts = productStore((state) => state.getProducts);
+  const getProductLog = productStore((state) => state.getProductLog);
+
   
 
   const justLoggedIn = authUserStore((state) => state.justLoggedIn);
@@ -49,7 +51,8 @@ export function MainPage() {
 
   useEffect(() => {
     getProducts();
-  }, [getProducts]);
+    getProductLog()
+  }, []);
 
   useEffect(() => {
     if (justLoggedIn && user) {

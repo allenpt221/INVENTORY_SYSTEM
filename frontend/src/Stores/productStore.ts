@@ -8,12 +8,24 @@ export type Products = {
     quantity: number;
     barcode: string;
     brand: string;
-    created_at: Date ;
+    created_at: Date;
     category: string;
     price: number;
     total: number;
     image?: string;
     descp?: string;
+}
+
+type InvetoryLogs = {
+    userId?: number;
+    productname: string;
+    stock: number;
+    stock_status: string;
+    price: number;
+    total: number;
+    previous_total: number;
+    updateby: string;
+    created_at: Date;
 }
 
 export type ProductInput = {
@@ -35,6 +47,7 @@ export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
 interface productState {
     loading: boolean;
     products: Products[];
+    Inventorylog: InvetoryLogs[];
     setProduct: (products: Products[]) => void;
     getProducts: () => void;
     createProduct: (registedProduct: ProductInput) => void;
@@ -42,11 +55,13 @@ interface productState {
     updateStock: (id: number, quantity: number) => void;
     updateProduct: (productId: ProductUpdatePayload) => void;
     productSearch: (query: string) => void;
+    getProductLog: () => void;
 }
 
 
 export const productStore = create<productState>((set, get) => ({
     products: [],
+    Inventorylog: [],
     loading: true,
     setProduct: (products) => set({products}),
 
@@ -56,6 +71,16 @@ export const productStore = create<productState>((set, get) => ({
             set({ products:res.data.items, loading: false});
         } catch (error: any) {
             console.error('Failed fetching data:', error);    
+        }
+    },
+
+    getProductLog: async (): Promise<void> => {
+        try {
+            const res = await axios.get('/inventory/updatelog');
+
+            set({Inventorylog: res.data.log})
+        } catch (error) {
+            
         }
     },
 
@@ -86,27 +111,46 @@ export const productStore = create<productState>((set, get) => ({
 
     updateStock: async (id: number, quantity: number): Promise<void> => {
         try {
-            const res = await axios.put(`/inventory/${id}`, { quantity }); // <-- Add slash before ID
+            const res = await axios.put(`/inventory/${id}`, { quantity });
 
-            const updatedData = res.data.stock
+            const updatedData = res.data.stock;
+            const newLog = res.data.log;
 
-            const updated = get().products.map(product =>
-            product.id === id ? { ...product, ...updatedData } : product // or update as needed
+            const updatedProducts = get().products.map(product =>
+            product.id === id ? { ...product, ...updatedData } : product
             );
-            set({ products: updated });
+
+            // Only push if new log is present
+            if (newLog) {
+            set({
+                products: updatedProducts,
+                Inventorylog: [newLog, ...get().Inventorylog]
+            });
+            } else {
+            set({ products: updatedProducts });
+            }
+
         } catch (error: any) {
             console.error('Failed to update Product stock:', error);
         }
     },
 
+
     updateProduct: async (productData: ProductUpdatePayload): Promise<void> => {
         try {
-            await axios.put(`/inventory/productupdate/${productData.id}`, productData);
+            const response = await axios.put(`/inventory/productupdate/${productData.id}`, productData);
 
+            const updatedProduct = response.data?.data;
 
-            set((prevState) => ({
-            products: prevState.products.map((product) =>
-                product.id === productData.id ? { ...product, ...productData } : product
+            if (!updatedProduct) {
+            console.warn("No product returned from backend");
+            return;
+            }
+
+            // Update the product in local state using backend response
+            set((state) => ({
+            products: state.products.map((product) =>
+                product.id === updatedProduct.id ? updatedProduct : product
             ),
             }));
         } catch (error) {

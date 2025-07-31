@@ -167,9 +167,9 @@ export function UpdateProduct({
                     htmlFor="image"
                     className="border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:border-gray-500 transition"
                 >
-                    {imagePreview || typeof products.image === 'string' ? (
+                    {(imagePreview || (typeof products.image === 'string' && products.image !== '')) ? (
                     <img
-                        src={imagePreview || (typeof products.image === 'string' ? products.image : '')}
+                        src={imagePreview || products.image}
                         alt="Preview"
                         className="w-full h-48 object-cover rounded-md"
                     />
