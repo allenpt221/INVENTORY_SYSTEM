@@ -76,8 +76,8 @@ export function Inventory() {
 
   const [selectedbarcodeId, setSelectedBarcodeId] = React.useState<number | null>(null);
   const [barcodeModal, setBarcodeModal] = React.useState<boolean>(false);
+  const loading = productStore((state) => state.loading);
 
-  const isLoading = rawProducts.length === 0;
 
 
 
@@ -453,7 +453,7 @@ const handleUpdateStock = (id: number) => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {loading ? (
               Array.from({ length: 10 }).map((_, idx) => (
                 <TableRow key={`skeleton-${idx}`}>
                   {Array.from({ length: columns.length }).map((_, colIdx) => (

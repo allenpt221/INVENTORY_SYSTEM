@@ -176,12 +176,14 @@ class InventoryController {
             }
 
             // Fetch total_before_all
-            const { data: allBefore, error: totalBeforeError } = await supabase
+            const { data: allBefore } = await supabase
             .from("Inventory")
-            .select("total");
+            .select("total, quantity");
 
             const totalBeforeAll =
             allBefore?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+            const stockBeforeAll =
+            allBefore?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
             // Calculate new total
             const price = Number(item.price);
@@ -206,12 +208,14 @@ class InventoryController {
             }
 
             // Fetch total_after_all
-            const { data: allAfter, error: totalAfterError } = await supabase
+            const { data: allAfter } = await supabase
             .from("Inventory")
-            .select("total");
+            .select("total, quantity");
 
             const totalAfterAll =
             allAfter?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+            const stockAfterAll =
+            allAfter?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
             // Log stock update
             const stockStatus = quantity > previousStock ? "increase" : "decrease";
@@ -239,20 +243,22 @@ class InventoryController {
             }
 
             // Log stock management totals
-            const { data: totals, error: stockError } = await supabase
+            const { data: insertedTotal, error: stockError } = await supabase
             .from("stock_management")
             .insert([
                 {
                 user_id: userIdToQuery,
-                stock_before: previousStock,
-                current_stock: quantity,
+                stock_before: stockBeforeAll,
+                current_stock: stockAfterAll,
                 before_price: item.price,
                 current_price: item.price,
                 total_before: totalBeforeAll,
                 current_total: totalAfterAll,
                 created_at: new Date().toISOString(),
                 },
-            ]);
+            ])
+            .select()
+            .single();
 
             if (stockError) {
             console.error("Stock management insert failed:", stockError.message);
@@ -262,7 +268,7 @@ class InventoryController {
             message: 'Updated successfully',
             stock: updatedItem,
             log: insertedLogs,
-            alltotal: totals,
+            latestTotal: insertedTotal?.current_total || 0,
             });
 
         } catch (error) {
@@ -272,9 +278,6 @@ class InventoryController {
         }
     }
    
-
-
-
 
     public async updateProduct(req: Request, res: Response): Promise<void> {
         try {
@@ -318,7 +321,7 @@ class InventoryController {
             // 2. Get total_before_all
             const { data: allItemsBefore, error: fetchAllBeforeError } = await supabase
             .from("Inventory")
-            .select("total");
+            .select("total, quantity");
 
             if (fetchAllBeforeError || !allItemsBefore) {
             console.error("Error fetching totals before update:", fetchAllBeforeError?.message);
@@ -326,6 +329,9 @@ class InventoryController {
 
             const totalBeforeAll =
             allItemsBefore?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+
+            const stockBeforeAll =
+            allItemsBefore?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
             // 3. Parse and prepare updated fields
             const parsedPrice = Number(price);
@@ -367,7 +373,7 @@ class InventoryController {
             // 5. Get total_after_all
             const { data: allItemsAfter, error: fetchAllAfterError } = await supabase
             .from("Inventory")
-            .select("total");
+            .select("total, quantity");
 
             if (fetchAllAfterError || !allItemsAfter) {
             console.error("Error fetching totals after update:", fetchAllAfterError?.message);
@@ -375,22 +381,26 @@ class InventoryController {
 
             const totalAfterAll =
             allItemsAfter?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+            const stockAfterAll =
+            allItemsAfter?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
             // 6. Log to stock_management
-            const { error: stockLogError } = await supabase
+            const { data: insertedLog, error: stockLogError } = await supabase
             .from("stock_management")
             .insert([
                 {
                 user_id: user.role === "staff" ? user.admin_id : user.id,
-                stock_before: existingItem.quantity,
-                current_stock: parsedQuantity,
+                stock_before: stockBeforeAll,
+                current_stock: stockAfterAll,
                 before_price: existingItem.price,
                 current_price: parsedPrice,
                 total_before: totalBeforeAll,
                 current_total: totalAfterAll,
                 created_at: new Date().toISOString(),
                 },
-            ]);
+            ])
+            .select()
+            .single();
 
             if (stockLogError) {
             console.warn("Stock management log error:", stockLogError.message);
@@ -400,14 +410,14 @@ class InventoryController {
             res.status(200).json({
             message: "Product updated successfully",
             data: updatedData,
+            currentTotal: insertedLog?.current_total ?? 0,
+            currentStock: insertedLog?.current_stock ?? 0
             });
         } catch (error: any) {
             console.error("Error updating product:", error);
             res.status(500).json({ error: "Server error while updating product" });
         }
     }
-
-
 
 
     public async searchItem(req: Request, res: Response): Promise<void> {
@@ -489,14 +499,33 @@ class InventoryController {
             .select("*")
             .eq("user_id", userIdToQuery);
 
-                    if (updateErrors || totalStockError) {
-                        if (updateErrors) console.error("Update logs error:", updateErrors.message);
-                        if (totalStockError) console.error("Stock logs error:", totalStockError.message);
-                    res.status(500).json({ error: "Error fetching logs from database" });
-                    return;
-                }
+            const { data: latestStock, error: latestStockError } = await supabase
+            .from('stock_management')
+            .select("current_stock, current_total, stock_before, total_before")
+            .eq("user_id", userIdToQuery)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
 
-            res.status(200).json({success: true, updateLogs: updateData, stockLogs: totalStocks})
+            if (updateErrors || totalStockError || latestStockError) {
+                if (updateErrors) console.error("Update logs error:", updateErrors.message);
+                if (totalStockError) console.error("Stock logs error:", totalStockError.message);
+                if (latestStockError) console.error("Latest stock fetch error:", latestStockError.message);
+                res.status(500).json({ error: "Error fetching logs from database" });
+                return;
+            }
+
+            res.status(200).json({
+                success: true, 
+                updateLogs: updateData, 
+                stockLogs: totalStocks,
+                latest: {
+                    lastestStock: latestStock.current_stock,
+                    latestTotal: latestStock.current_total,
+                    beforestock: latestStock.stock_before,
+                    beforetotal: latestStock.total_before
+                }
+            })
 
         } catch (error) {
             console.error("Error fetching inventorylogs:", error);

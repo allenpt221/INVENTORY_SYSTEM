@@ -58,6 +58,12 @@ export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
 interface productState {
     loading: boolean;
     products: Products[];
+    latest: {
+        lastestStock: number;
+        latestTotal: number;
+        beforestock: number;
+        beforetotal: number;
+    } | null;
     inventorylog: InvetoryLogs[];
     stocklog: StockLogs[]
     setProduct: (products: Products[]) => void;
@@ -75,6 +81,7 @@ export const productStore = create<productState>((set, get) => ({
     products: [],
     inventorylog: [],
     stocklog: [],
+    latest: null,
     loading: true,
     setProduct: (products) => set({products}),
 
@@ -92,7 +99,7 @@ export const productStore = create<productState>((set, get) => ({
             const res = await axios.get('/inventory/updatelog');
 
             set({inventorylog: res.data.updateLogs})
-            set({stocklog: res.data.stocklogs});
+            set({stocklog: res.data.stockLogs, latest: res.data.latest, loading: false});
         } catch (error) {
             console.error("Error fetching logs:", error);
         }
@@ -144,6 +151,8 @@ export const productStore = create<productState>((set, get) => ({
             set({ products: updatedProducts });
             }
 
+            get().getProductLog();
+
         } catch (error: any) {
             console.error('Failed to update Product stock:', error);
         }
@@ -167,6 +176,8 @@ export const productStore = create<productState>((set, get) => ({
                 product.id === updatedProduct.id ? updatedProduct : product
             ),
             }));
+
+            get().getProductLog();
         } catch (error) {
             console.error("Failed to update product:", error);
         }
