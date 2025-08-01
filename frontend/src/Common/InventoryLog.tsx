@@ -1,7 +1,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -24,7 +23,7 @@ export function InventoryLog() {
   const totalProduct = product.filter((items) => items.productName).length;
 
   const latestPercentage = ((latest?.latestTotal ?? 0) / 1000000) * 100;
-  const latestStockPercentage = (latest?.lastestStock ?? 0) / 100;
+  const latestStockPercentage = (latest?.latestStock ?? 0) / 100;
 
   const [sortAsc, setSortAsc] = useState<boolean>(true);
 
@@ -89,17 +88,17 @@ export function InventoryLog() {
               Total Stock
             </h2>
             <div className="text-2xl font-semibold text-gray-900 flex items-end justify-between dark:text-white">
-              {latest?.lastestStock ?? 0}
+              {latest?.latestStock ?? 0}
               <span
                 className={`flex items-center gap-1 text-sm font-medium ${
-                  (latest?.lastestStock ?? 0) > (latest?.beforestock ?? 0)
+                  (latest?.latestStock ?? 0) > (latest?.beforestock ?? 0)
                     ? "text-green-500"
-                    : (latest?.lastestStock ?? 0) === (latest?.beforestock ?? 0) ? "text-green-500" : "text-red-500"
+                    : (latest?.latestStock ?? 0) === (latest?.beforestock ?? 0) ? "text-green-500" : "text-red-500"
                 }`}
               >
-                {(latest?.lastestStock ?? 0) > (latest?.beforestock ?? 0) ? (
+                {(latest?.latestStock ?? 0) > (latest?.beforestock ?? 0) ? (
                   <ArrowUpRight size={16} />
-                ) : (latest?.lastestStock ?? 0) === (latest?.beforestock ?? 0) ? <ArrowUpRight size={16} /> :  (
+                ) : (latest?.latestStock ?? 0) === (latest?.beforestock ?? 0) ? <ArrowUpRight size={16} /> :  (
                   <ArrowDownRight size={16} />
                 )}
                 {latestStockPercentage.toFixed(2)}%
@@ -139,9 +138,6 @@ export function InventoryLog() {
         ) : (
         <div className="overflow-x-auto rounded-lg bg-white dark:bg-black">
             <Table className="min-w-[1000px]">
-            <TableCaption className="text-muted-foreground">
-                A list of your recent stock updates.
-            </TableCaption>
             <TableHeader>
                 <TableRow>
                 <TableHead>

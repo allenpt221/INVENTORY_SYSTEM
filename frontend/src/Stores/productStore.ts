@@ -16,7 +16,7 @@ export type Products = {
     descp?: string;
 }
 
-type InvetoryLogs = {
+type InventoryLogs = {
     userId?: number;
     productname: string;
     stock: number;
@@ -58,13 +58,14 @@ export type ProductUpdatePayload = Omit<Products, 'created_at' | 'total'>;
 interface productState {
     loading: boolean;
     products: Products[];
+    listProduct: Products[];
     latest: {
-        lastestStock: number;
+        latestStock: number;
         latestTotal: number;
         beforestock: number;
         beforetotal: number;
     } | null;
-    inventorylog: InvetoryLogs[];
+    inventorylog: InventoryLogs[];
     stocklog: StockLogs[]
     setProduct: (products: Products[]) => void;
     getProducts: () => void;
@@ -79,6 +80,7 @@ interface productState {
 
 export const productStore = create<productState>((set, get) => ({
     products: [],
+    listProduct: [],
     inventorylog: [],
     stocklog: [],
     latest: null,
@@ -88,7 +90,7 @@ export const productStore = create<productState>((set, get) => ({
     getProducts: async (): Promise<void> => {
         try {
             const res = await axios.get('/inventory');
-            set({ products:res.data, loading: false});
+            set({ products:res.data, listProduct: res.data, loading: false});
         } catch (error: any) {
             console.error('Failed fetching data:', error);    
         }
@@ -186,7 +188,7 @@ export const productStore = create<productState>((set, get) => ({
     productSearch: async (query: string) => {
     try {
       const res = await axios.get(`inventory/search?q=${encodeURIComponent(query)}`);
-      set({ products: res.data.results });
+      set({ listProduct: res.data.results });
     } catch (error) {
       console.error('Error searching products:', error);
     }

@@ -9,9 +9,10 @@ export function Product() {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const productSearch = productStore((state) => state.productSearch);
-  const products = productStore((state) => state.products);
+  const products = productStore((state) => state.listProduct) ?? [];
   const getAllProducts = productStore((state) => state.getProducts);
   const loading = productStore((state) => state.loading);
+
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
@@ -83,30 +84,27 @@ export function Product() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {loading ? (
             Array.from({ length: 15 }).map((_, index) => (
-						<div
-							key={index}
-							className="w-full shrink-0 shadow-lg border p-4 rounded animate-pulse"
-						>
-							<div className="w-full h-40 bg-gray-200 rounded mb-4" />
-							<div className="h-4 bg-gray-200 rounded mb-2 w-2/3" />
-							<div className="h-3 bg-gray-200 rounded w-full" />
-						</div>
-						))
-           ) : paginatedProducts.length === 0 ? (
-              <p className="text-center col-span-full text-gray-500 dark:text-gray-400">
-                No products found.
-              </p>
-           ) : (
+              <div
+                key={index}
+                className="w-full shrink-0 shadow-lg border p-4 rounded animate-pulse"
+              >
+                <div className="w-full h-40 bg-gray-200 rounded mb-4" />
+                <div className="h-4 bg-gray-200 rounded mb-2 w-2/3" />
+                <div className="h-3 bg-gray-200 rounded w-full" />
+              </div>
+            ))
+          ) : paginatedProducts.length === 0 ? (
+            <p className="text-center col-span-full text-gray-500 dark:text-gray-400">
+              No products found.
+            </p>
+          ) : (
             paginatedProducts.map((prod) => (
               <div
                 key={prod.id}
                 className="flex flex-col gap-3 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
               >
                 {/* Product Image */}
-                <div className="relative w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden"
-                  style={{
-                    background: "dark:linear-gradient(90deg, #111111 10%, #1a1a1a 40%, #2b2b2b 70%, #111111 100%)  linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)",
-                  }}>
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800">
                   <img
                     src={prod.image}
                     alt={prod.productName || "Product"}
@@ -117,7 +115,7 @@ export function Product() {
                     }}
                   />
                 </div>
-  
+
                 {/* Product Info */}
                 <div className="flex flex-col gap-2 mt-1">
                   <div className="flex justify-between items-start">
@@ -128,11 +126,11 @@ export function Product() {
                       ₱{formatNumberPrice(prod.price)}
                     </p>
                   </div>
-  
+
                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                     {prod.descp || "No description available"}
                   </p>
-  
+
                   <div className="flex justify-between items-center mt-2 text-sm">
                     <span className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
                       <span className="font-medium">Brand:</span>

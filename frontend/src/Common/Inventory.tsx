@@ -464,8 +464,8 @@ const handleUpdateStock = (id: number) => {
                 </TableRow>
               ))
             ) :
-            table.getPaginationRowModel().rows.length ? (
-              table.getFilteredRowModel().rows.map((row) => (
+            table.getSortedRowModel().rows.length ? (
+              table.getSortedRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}

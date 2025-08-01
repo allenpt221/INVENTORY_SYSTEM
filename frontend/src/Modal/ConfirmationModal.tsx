@@ -18,7 +18,7 @@ export const ConfirmationModal = ({
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white py-5 px-4 rounded-xl w-full max-w-sm shadow-lg space-y-4 dark:text-white dark:bg-black"
+        className="bg-white py-5 px-4 rounded-xl w-full max-w-sm shadow-lg space-y-4 dark:text-white dark:bg-black dark:border"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold">{title}</h2>

@@ -644,7 +644,7 @@ class InventoryController {
                 updateLogs: updateData, 
                 stockLogs: totalStocks,
                 latest: {
-                    lastestStock: latestStock.current_stock,
+                    latestStock: latestStock.current_stock,
                     latestTotal: latestStock.current_total,
                     beforestock: latestStock.stock_before,
                     beforetotal: latestStock.total_before
