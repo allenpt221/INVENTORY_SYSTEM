@@ -55,9 +55,9 @@ const printRef = useRef<HTMLDivElement>(null);
     exit={{opacity: 0, y: -100}}
     transition={{duration: 0.5}}
     onClick={(e) => e.stopPropagation()}
-    className="bg-white p-4 rounded-lg shadow-lg w-[20rem]">
+    className="bg-white p-4 rounded-lg shadow-lg w-[20rem] dark:border dark:bg-black">
         <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Barcode</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Barcode</h2>
         <button onClick={isClose}>
             <X />
         </button>
@@ -76,7 +76,7 @@ const printRef = useRef<HTMLDivElement>(null);
         <div className="mt-4 text-right">
         <button
             onClick={handlePrint}
-            className="px-4 py-1 bg-black text-white rounded hover:bg-black/60"
+            className="px-4 py-1 bg-black text-white rounded hover:bg-black/60 dark:bg-white dark:text-black"
         >
             Print
         </button>

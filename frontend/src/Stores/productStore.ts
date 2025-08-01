@@ -112,7 +112,7 @@ export const productStore = create<productState>((set, get) => ({
             const res = await axios.post('/inventory/create', registedProduct);
 
             set((prevState) => ({
-                products: [...prevState.products, res.data.products]
+                products: [...prevState.products, res.data.product]
             }));
             
         } catch (error: any) {
