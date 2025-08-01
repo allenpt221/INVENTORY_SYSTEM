@@ -23,52 +23,55 @@ class InventoryController {
 
     public async addItem(req: Request, res: Response): Promise<void> {
         try {
-            const userId = req.user?.id;
-            const {  productName, SKU, quantity, barcode, brand, category, image, price }: InventoryItem = req.body;
+        const user = req.user;
+        const userId = user?.id;
 
-            const Parseprice = parseFloat(price as any);
-            const ParseQuantity = parseInt(quantity as any);
+        const {
+            productName,
+            SKU,
+            quantity,
+            barcode,
+            brand,
+            category,
+            image,
+            price,
+        }: InventoryItem = req.body;
 
-            const total = Parseprice * ParseQuantity
+        const Parseprice = parseFloat(price as any);
+        const ParseQuantity = parseInt(quantity as any);
+        const total = Parseprice * ParseQuantity;
 
-            let imageUrl = "";
+        if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category || !price) {
+            res.status(400).json({ error: 'All fields are required' });
+            return;
+        }
 
-            try {
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        const [totalsBefore, imageUrl] = await Promise.all([
+            supabase.from("Inventory").select("total, quantity"),
+            (async () => {
             if (image && image.startsWith("data:image")) {
-
-                // using this function is to remove directly the bg of the image
-                const transparentImage = await removeBackgroundFromImage(image); 
-
-
-                const result = await cloudinary.uploader.upload(transparentImage, {
-                folder: "products",
-            });
-                imageUrl = result.secure_url;
+                try {
+                const transparentImage = await removeBackgroundFromImage(image);
+                const result = await cloudinary.uploader.upload(transparentImage, { folder: "products" });
+                return result.secure_url;
+                } catch {
+                const fallback = await cloudinary.uploader.upload(image, { folder: "products" });
+                return fallback.secure_url;
+                }
             }
-            } catch (error) {
-            console.warn("Background removal failed, uploading original image.");
-            const fallback = await cloudinary.uploader.upload(image, {
-                folder: "products",
-            });
-            imageUrl = fallback.secure_url;
-            }
+            return "";
+            })(),
+        ]);
 
-
-            if (!productName || !SKU || quantity === undefined || !barcode || !brand || !category || !price) {
-                res.status(400).json({ error: 'All fields are required' });
-                return;
-            }
-
-            if (!userId) {
-                console.error('No user ID found on request');
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
-
-            // Insert item into the Inventory table
-            const { data, error } = await supabase
-            .from('Inventory')
-            .insert([{
+        const insertItem = await supabase
+            .from("Inventory")
+            .insert([
+            {
                 user_id: userId,
                 productName,
                 SKU,
@@ -80,59 +83,97 @@ class InventoryController {
                 total,
                 image: imageUrl,
                 created_at: new Date().toISOString(),
-            }]).select()
+            },
+            ])
+            .select()
             .single();
 
-            if (error) {
-                console.error('Error creating items:', error);
-                res.status(500).json({ error: 'Failed to creating items' });
-                return;
-            }
+        if (insertItem.error || !insertItem.data) {
+            res.status(500).json({ error: 'Failed to create item' });
+            return;
+        }
 
-        
+        const totalBeforeAll = totalsBefore.data?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+        const stockBeforeAll = totalsBefore.data?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
-            res.status(201).json({
-                message: 'Item added successfully', products: data})
-            
+        const totalsAfter = await supabase.from("Inventory").select("total, quantity");
+        const totalAfterAll = totalsAfter.data?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+        const stockAfterAll = totalsAfter.data?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+
+        const userEmail = user?.email || "Unknown";
+        const userIdToQuery = user?.role === "staff" ? user.admin_id : user.id;
+
+        const [logInsert, stockInsert] = await Promise.all([
+            supabase
+            .from("after_update_the_stock")
+            .insert([
+                {
+                userId: userIdToQuery,
+                productname: insertItem.data.productName,
+                stock_status: "New",
+                stock: insertItem.data.quantity,
+                price: insertItem.data.price,
+                total: insertItem.data.total,
+                previous_total: insertItem.data.total,
+                updateby: userEmail,
+                created_at: new Date().toISOString(),
+                },
+            ]),
+            supabase
+            .from("stock_management")
+            .insert([
+                {
+                user_id: userIdToQuery,
+                stock_before: stockBeforeAll,
+                current_stock: stockAfterAll,
+                before_price: 0,
+                current_price: Parseprice,
+                total_before: totalBeforeAll,
+                current_total: totalAfterAll,
+                created_at: new Date().toISOString(),
+                },
+            ]),
+        ]);
+
+        if (logInsert.error) console.warn("Inventory log failed:", logInsert.error.message);
+        if (stockInsert.error) console.warn("Stock log failed:", stockInsert.error.message);
+
+        res.status(201).json({
+            message: 'Item added successfully',
+            product: insertItem.data,
+            inventoryLog: logInsert.data,
+            stockLog: stockInsert.data,
+        });
         } catch (error: any) {
-            console.error('Creating Item Error', error);
-            res.status(401).json({ error: 'Internal server error' });
+        console.error('Creating Item Error:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
         }
     }
 
     public async getItems(req: Request, res: Response): Promise<void> {
         try {
-            const user = req.user;  
+        const user = req.user!;
+        const userIdToQuery = user?.role === "staff" ? user.admin_id : user.id;
 
-            if (!user) {
-            res.status(401).json({ error: "User not authenticated" });
-            return;
-            }
-
-            const userIdToQuery = user.role === 'staff' ? user.admin_id : user.id;
-
-            if (!userIdToQuery) {
-            res.status(400).json({ error: "Cannot determine user context" });
-            return;
-            }
-
-            const { data, error } = await supabase
+        const { data: items, error } = await supabase
             .from("Inventory")
             .select("*")
-            .eq("user_id", userIdToQuery);
+            .eq("user_id", userIdToQuery)
+            .order("created_at", { ascending: false })
+            .limit(100);
 
-            if (error) {
-            console.error("Error fetching inventory:", error);
-            res.status(500).json({ error: "Failed to fetch inventory" });
+        if (error) {
+            res.status(500).json({ error: 'Failed to fetch inventory' });
             return;
-            }
+        }
 
-            res.status(200).json({ items: data });
+        res.status(200).json(items);
         } catch (error: any) {
-            console.error("Error in getItems:", error);
-            res.status(500).json({ error: "Internal server error" });
+        console.error('Fetching Items Error:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
         }
     }
+
 
 
     public async updateQuantity(req: Request, res: Response): Promise<void> {
@@ -454,20 +495,97 @@ class InventoryController {
     public async deleteProduct(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
+            const user = req.user; 
 
-            const { data, error } = await supabase
+
+            const { data: existingItem, error: fetchError } = await supabase
+                .from("Inventory")
+                .select("*")
+                .eq("id", id)
+                .single();
+
+            if (fetchError || !existingItem) {
+                res.status(404).json({ message: "Product not found", error: fetchError?.message });
+                return
+            }
+
+            const { data: allItemsBefore, error: fetchBeforeError } = await supabase
+                .from("Inventory")
+                .select("total, quantity");
+
+            if (fetchBeforeError) {
+                console.error("Error fetching totals before delete:", fetchBeforeError.message);
+            }
+
+            const totalBeforeAll = allItemsBefore?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+            const stockBeforeAll = allItemsBefore?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+
+             
+            const { data: deletedProduct, error: deleteError } = await supabase
                 .from("Inventory")
                 .delete()
                 .eq("id", id)
                 .select()
                 .single();
 
-            if (error) {
-                res.status(500).json({ message: "Failed to delete product", error });
-                return;
+            if (deleteError || !deletedProduct) {
+                res.status(500).json({ message: "Failed to delete product", error: deleteError?.message });
             }
 
-            const deletedProduct = data;
+            const { error: afterdelete } = await supabase
+            .from("deletion_log")
+            .insert([{
+                productName: existingItem.productName,
+                SKU: existingItem.SKU,
+                quantity: existingItem.quantity,
+                category: existingItem.category,
+                barcode: existingItem.barcode,
+                brand: existingItem.brand,
+                image: existingItem.image,
+                price: existingItem.price,
+                total: existingItem.total,
+                deleteby: user?.email,
+                user_id: user?.role === "staff" ? user.admin_id : user?.id,
+                created_at: new Date().toISOString()
+            }])
+
+            if (afterdelete) {
+                console.error("Error deleting delete:", afterdelete.message);
+            }
+
+            const { data: allItemsAfter, error: fetchAfterError } = await supabase
+                .from("Inventory")
+                .select("total, quantity");
+
+            if (fetchAfterError) {
+                console.error("Error fetching totals after delete:", fetchAfterError.message);
+            }
+
+            const totalAfterAll = allItemsAfter?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
+            const stockAfterAll = allItemsAfter?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+
+            const parsedPrice = parseFloat(existingItem.price); 
+
+            const { data: insertedLog, error: stockLogError } = await supabase
+                .from("stock_management")
+                .insert([
+                    {
+                        user_id: user?.role === "staff" ? user.admin_id : user?.id,
+                        stock_before: stockBeforeAll,
+                        current_stock: stockAfterAll,
+                        before_price: parsedPrice,
+                        current_price: 0, // deleted item, no current price
+                        total_before: totalBeforeAll,
+                        current_total: totalAfterAll,
+                        created_at: new Date().toISOString(),
+                    },
+                ])
+                .select()
+                .single();
+
+            if (stockLogError) {
+                console.error("Failed to log stock deletion:", stockLogError.message);
+            }
 
             if (deletedProduct?.public_id) {
                 try {
@@ -476,12 +594,18 @@ class InventoryController {
                     console.error("Cloudinary deletion failed:", cloudErr.message);
                 }
             }
+            res.status(200).json({
+                message: "Product deleted successfully",
+                deletedProduct,
+                stockLog: insertedLog,
+            });
 
-            res.status(200).json({ message: "Product deleted successfully" });
         } catch (err: any) {
+            console.error("Unexpected error during deletion:", err.message);
             res.status(500).json({ message: "Unexpected error in deleteProduct", error: err.message });
         }
     }
+
 
     public async getUpdateLogs(req: Request, res: Response): Promise<void> {
         try {
