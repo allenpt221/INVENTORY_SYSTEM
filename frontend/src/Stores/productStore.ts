@@ -88,7 +88,7 @@ export const productStore = create<productState>((set, get) => ({
     getProducts: async (): Promise<void> => {
         try {
             const res = await axios.get('/inventory');
-            set({ products:res.data.items, loading: false});
+            set({ products:res.data, loading: false});
         } catch (error: any) {
             console.error('Failed fetching data:', error);    
         }

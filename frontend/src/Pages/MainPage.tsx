@@ -69,7 +69,7 @@ export function MainPage() {
 
 
   return (
-    <div className="flex relative">
+    <div className="flex">
       <SidebarProvider>
         <AppSidebar 
         account={() => setOpenAcount(true)}
@@ -86,7 +86,7 @@ export function MainPage() {
           {showAlert && (
             <Alert
               variant="default"
-              className="absolute w-[40rem] z-10 h-[4rem] top-5 right-[35rem]"
+              className="fixed top-5 left-1/2 transform -translate-x-1/2 z-10 sm:w-full w-[18rem] max-w-md md:max-w-xl px-4"
             >
               <CheckCircle2Icon className="h-5 w-5 text-green-500 mt-1 shrink-0" />
               <div>
