@@ -203,8 +203,10 @@ export function InventoryLog() {
                         </span>
                         </TableCell>
                         <TableCell className="text-center">
-                        ₱{formatNumberPrice(logs.previous_total || 0)} → ₱
-                        {formatNumberPrice(logs.total)}
+                        {logs.previous_total === logs.total
+                          ? `₱${formatNumberPrice(logs.total)}`
+                          : `₱${formatNumberPrice(logs.previous_total || 0)} → ₱${formatNumberPrice(logs.total)}`
+                        }
                         </TableCell>
                         <TableCell className="text-center">{logs.updateby}</TableCell>
                         <TableCell className="text-center">{date}</TableCell>

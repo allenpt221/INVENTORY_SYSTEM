@@ -26,6 +26,7 @@ export function MainPage() {
 
   const getProducts = productStore((state) => state.getProducts);
   const getProductLog = productStore((state) => state.getProductLog);
+  const disposeProducts = productStore((state) => state.disposeProducts);
 
   
 
@@ -51,7 +52,8 @@ export function MainPage() {
 
   useEffect(() => {
     getProducts();
-    getProductLog()
+    getProductLog();
+    disposeProducts();
   }, []);
 
   useEffect(() => {

@@ -26,7 +26,20 @@ type InventoryLogs = {
     previous_total: number;
     updateby?: string;
     created_at: Date;
-    deleteby?: string;
+}
+
+type disposeLogs = {
+    user_id?: number;
+    productName: string;
+    SKU: string;
+    quantity: number;
+    category: string
+    barcode: string;
+    brand: string;
+    price: number;
+    total: number;
+    deleteby: string;
+    created_at: Date;
 }
 
 export type ProductInput = {
@@ -60,7 +73,7 @@ interface productState {
     loading: boolean;
     products: Products[];
     listProduct: Products[];
-    dispose: InventoryLogs[];
+    dispose: disposeLogs[];
     latest: {
         latestStock: number;
         latestTotal: number;
