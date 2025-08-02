@@ -36,7 +36,7 @@ export function Dashboard() {
 
       <div className="flex flex-col lg:flex-row justify-between gap-6">
         {/* Disposed Products Table */}
-        <div className="bg-white border rounded-xl shadow p-4 overflow-x-auto w-full h-fit">
+        <div className="bg-white border rounded-xl shadow p-4 overflow-x-auto w-full h-fit max-h-[28rem]">
           <h2 className="text-lg font-medium mb-4">Disposed Products</h2>
 
           <Table className="min-w-[1000px]">
@@ -86,7 +86,7 @@ export function Dashboard() {
                 sortedDispose.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{item.productName}</TableCell>
-                    <TableCell className="text-center">${item.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">₱{item.price.toFixed(2)}</TableCell>
                     <TableCell className="text-center">{item.quantity}</TableCell>
                     <TableCell className="text-center">{item.barcode}</TableCell>
                     <TableCell className="text-center">{item.SKU}</TableCell>

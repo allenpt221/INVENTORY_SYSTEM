@@ -22,7 +22,7 @@ export function InventoryLog() {
 
   const totalProduct = product.filter((items) => items.productName).length;
 
-  const latestPercentage = ((latest?.latestTotal ?? 0) / 1000000) * 100;
+  const latestPercentage = ((latest?.latestTotal ?? 0) / 10000000) * 100;
   const latestStockPercentage = (latest?.latestStock ?? 0) / 100;
 
   const [sortAsc, setSortAsc] = useState<boolean>(true);

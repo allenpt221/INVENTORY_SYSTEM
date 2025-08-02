@@ -1,5 +1,3 @@
-"use client"
-
 import { useMemo } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
 import { Bar, BarChart, XAxis, YAxis } from "recharts"
@@ -44,9 +42,21 @@ export function ComboChart() {
       stock: 0,
     }))
 
+    // Get only the latest stock entry per month
+    const latestByMonth = new Map<number, typeof stocklog[0]>()
+
     stocklog.forEach((item) => {
       const month = new Date(item.created_at).getMonth()
-      monthly[month].stock += item.current_stock || 0
+      const existing = latestByMonth.get(month)
+
+      if (!existing || new Date(item.created_at) > new Date(existing.created_at)) {
+        latestByMonth.set(month, item)
+      }
+    })
+
+    // Fill monthly array with latest current_stock values
+    latestByMonth.forEach((item, month) => {
+      monthly[month].stock = item.current_stock || 0
     })
 
     const currentMonthIndex = new Date().getMonth()
@@ -56,13 +66,12 @@ export function ComboChart() {
     const prevStock = prevMonthIndex !== null ? monthly[prevMonthIndex]?.stock || 0 : 0
 
     const difference = currentStock - prevStock
-    const percentChange = prevStock > 0 ? (difference / prevStock) / 100 * 100 : 0
+    const percentChange = prevStock > 0 ? (difference / prevStock) * 100 : 0
 
     const isTrendingUp = percentChange >= 0
     const trendingText = isTrendingUp
-        ? `Trending up by ${percentChange.toFixed(2)}% this month`
-        : `Trending down by ${Math.abs(percentChange).toFixed(2)}% this month`
-
+      ? `stock up by ${percentChange.toFixed(2)}% this month`
+      : `stock down by ${Math.abs(percentChange).toFixed(2)}% this month`
 
     return {
       chartData: monthly,
@@ -74,11 +83,11 @@ export function ComboChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Bar Chart - Horizontal</CardTitle>
+        <CardTitle>Stock - Bar Chart</CardTitle>
         <CardDescription>January - December {new Date().getFullYear()}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-[270px] w-[13rem]">
           <BarChart
             accessibilityLayer
             data={chartData}
@@ -112,7 +121,7 @@ export function ComboChart() {
           )}
         </div>
         <div className="text-muted-foreground leading-none">
-          Showing total stock for the last 12 months
+          Showing most recent stock entry per month
         </div>
       </CardFooter>
     </Card>
