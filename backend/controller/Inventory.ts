@@ -175,7 +175,6 @@ class InventoryController {
     }
 
 
-
     public async updateQuantity(req: Request, res: Response): Promise<void> {
         try {
             const itemId = req.params.id;
@@ -606,7 +605,6 @@ class InventoryController {
         }
     }
 
-
     public async getUpdateLogs(req: Request, res: Response): Promise<void> {
         try {
             const user = req.user;
@@ -654,6 +652,26 @@ class InventoryController {
         } catch (error) {
             console.error("Error fetching inventorylogs:", error);
             res.status(500).json({ error: "Server error while fetching inventorylogs" });
+        }
+    }
+
+    public async disposedProducts(req: Request, res: Response): Promise<void> {
+        try {
+            
+            const { data , error } = await supabase
+            .from("deletion_log")
+            .select("*")
+
+            if(error){
+                console.log("deletion logs Error", error);
+            }
+
+            res.status(200).json({sucess:true, dispose: data});
+            return;
+            
+        } catch (error: any) {
+            console.error("Error in disposedProducts", error);
+            res.status(400).json({error: "Server error while fetching deletion_log"});
         }
     }
 

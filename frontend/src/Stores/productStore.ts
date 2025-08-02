@@ -24,8 +24,9 @@ type InventoryLogs = {
     price: number;
     total: number;
     previous_total: number;
-    updateby: string;
+    updateby?: string;
     created_at: Date;
+    deleteby?: string;
 }
 
 export type ProductInput = {
@@ -59,6 +60,7 @@ interface productState {
     loading: boolean;
     products: Products[];
     listProduct: Products[];
+    dispose: InventoryLogs[];
     latest: {
         latestStock: number;
         latestTotal: number;
@@ -75,12 +77,14 @@ interface productState {
     updateProduct: (productId: ProductUpdatePayload) => void;
     productSearch: (query: string) => void;
     getProductLog: () => void;
+    disposeProducts: () => void;
 }
 
 
 export const productStore = create<productState>((set, get) => ({
     products: [],
     listProduct: [],
+    dispose: [],
     inventorylog: [],
     stocklog: [],
     latest: null,
@@ -192,7 +196,18 @@ export const productStore = create<productState>((set, get) => ({
     } catch (error) {
       console.error('Error searching products:', error);
     }
-  },
+    },
+
+    disposeProducts: async () => {
+        try {
+            const res = await axios.get('inventory/disposelogs');
+
+            set({dispose: res.data.dispose, loading: false})
+        } catch (error: any) {
+            console.log("error fetching the dispose products")
+
+        }
+    },
 
 
 }));

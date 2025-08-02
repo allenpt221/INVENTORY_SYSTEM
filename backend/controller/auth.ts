@@ -342,53 +342,73 @@ class AuthService {
   }
 
 
-public async updateAccount(req: Request, res: Response): Promise<void> {
-  try {
-    const {
-      id, staff_id, username, email, image, role,}: AccountCredentials = req.body;
+  public async updateAccount(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        id, staff_id, username, email, image, role,}: AccountCredentials = req.body;
 
-    if (!username || !email || (role === "staff" ? !staff_id : !id)) {
-      res.status(400).json({ error: "Missing required fields" });
-      return;
-    }
+      if (!username || !email || (role === "staff" ? !staff_id : !id)) {
+        res.status(400).json({ error: "Missing required fields" });
+        return;
+      }
 
-    const updateFields: Partial<AccountCredentials> = { username, email };
+      const updateFields: Partial<AccountCredentials> = { username, email };
 
-    // Optional image upload
-    if (image && image.startsWith("data:image")) {
-      const cloudinaryResponse = await cloudinary.uploader.upload(image, {
-        folder: "products",
+      // Optional image upload
+      if (image && image.startsWith("data:image")) {
+        const cloudinaryResponse = await cloudinary.uploader.upload(image, {
+          folder: "products",
+        });
+        updateFields.image = cloudinaryResponse.secure_url;
+      }
+
+      // Choose table and key
+      const tableToUpdate = role === "staff" ? "staffAuthentication" : "authentication";
+      const keyColumn = role === "staff" ? "staff_id" : "id";
+      const keyValue = role === "staff" ? staff_id : id;
+
+      const { data, error } = await supabase
+        .from(tableToUpdate)
+        .update(updateFields)
+        .eq(keyColumn, keyValue)
+        .select("username, email, image, role");
+
+      if (error) {
+        console.error(`Supabase ${tableToUpdate} update error:`, error);
+        res.status(500).json({ error: "Failed to update account" });
+        return;
+      }
+
+      res.status(200).json({
+        message: "Update successfully",
+        account: data?.[0],
       });
-      updateFields.image = cloudinaryResponse.secure_url;
+
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      res.status(500).json({ error: "Server error" });
     }
-
-    // Choose table and key
-    const tableToUpdate = role === "staff" ? "staffAuthentication" : "authentication";
-    const keyColumn = role === "staff" ? "staff_id" : "id";
-    const keyValue = role === "staff" ? staff_id : id;
-
-    const { data, error } = await supabase
-      .from(tableToUpdate)
-      .update(updateFields)
-      .eq(keyColumn, keyValue)
-      .select("username, email, image, role");
-
-    if (error) {
-      console.error(`Supabase ${tableToUpdate} update error:`, error);
-      res.status(500).json({ error: "Failed to update account" });
-      return;
-    }
-
-    res.status(200).json({
-      message: "Update successfully",
-      account: data?.[0],
-    });
-
-  } catch (error) {
-    console.error("Unexpected error:", error);
-    res.status(500).json({ error: "Server error" });
   }
-}
+
+  public async ObtainAuthStaff(req: Request, res: Response): Promise<void> {
+    try {
+
+      const {data, error} = await supabase 
+      .from("staffAuthentication")
+      .select("*")
+
+      if(error){
+        console.error("Supabase update error:", error);
+        res.status(500).json({ error: "Failed to update account" });
+      }
+
+
+      res.status(200).json({sucess:true, staff: data});
+    } catch (error: any) {
+        console.error("Unexpected Error in OnbtainAuthStaff");
+        res.status(400).json({error: "Server Error"})
+    }
+  }
 
 
 

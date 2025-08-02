@@ -16,6 +16,8 @@ router.delete('/:id', protectRoute, inventoryController.deleteProduct.bind(inven
 router.put('/productupdate/:id', protectRoute, inventoryController.updateProduct.bind(inventoryController));
 
 router.get('/updatelog', protectRoute , inventoryController.getUpdateLogs.bind(inventoryController));
+router.get('/disposelogs', protectRoute, adminRoute, inventoryController.disposedProducts.bind(inventoryController));
+
 
 
 
