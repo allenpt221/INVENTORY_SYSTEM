@@ -15,6 +15,8 @@ router.put('/account', protectRoute, authService.updateAccount.bind(authService)
 
 
 router.get('/getprofile', protectRoute,  authService.getProfile.bind(authService));
+router.get('/getstaff', protectRoute, adminRoute,  authService.ObtainAuthStaff.bind(authService));
+
 
 
 
