@@ -117,6 +117,7 @@ class InventoryController {
                 previous_total: insertItem.data.total,
                 updateby: userEmail,
                 created_at: new Date().toISOString(),
+                product_id: insertItem.data.id
                 },
             ]),
             supabase
@@ -519,6 +520,17 @@ class InventoryController {
             const totalBeforeAll = allItemsBefore?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
             const stockBeforeAll = allItemsBefore?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
+        const { error: deleteErrorLog } = await supabase
+                .from("after_update_the_stock")
+                .delete()
+                .eq("product_id", id)
+                .select()
+                .single();
+
+            if (deleteErrorLog) {
+                res.status(500).json({ message: "Failed to delete product from after_update_the_stock", error: deleteErrorLog?.message });
+            }
+
              
             const { data: deletedProduct, error: deleteError } = await supabase
                 .from("Inventory")
@@ -530,6 +542,9 @@ class InventoryController {
             if (deleteError || !deletedProduct) {
                 res.status(500).json({ message: "Failed to delete product", error: deleteError?.message });
             }
+
+
+
 
             const { error: afterdelete } = await supabase
             .from("deletion_log")
