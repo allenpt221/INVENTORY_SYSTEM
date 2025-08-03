@@ -57,11 +57,13 @@ class InventoryController {
             if (image && image.startsWith("data:image")) {
                 try {
                 const transparentImage = await removeBackgroundFromImage(image);
+                console.log("Transparent image generated successfully.");
                 const result = await cloudinary.uploader.upload(transparentImage, { folder: "products" });
                 return result.secure_url;
-                } catch {
-                const fallback = await cloudinary.uploader.upload(image, { folder: "products" });
-                return fallback.secure_url;
+                } catch (error: any) {
+                    console.warn("removeBackgroundFromImage failed:", error?.message || error);
+                    const fallback = await cloudinary.uploader.upload(image, { folder: "products" });
+                    return fallback.secure_url;
                 }
             }
             return "";
