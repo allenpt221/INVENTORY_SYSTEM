@@ -126,34 +126,46 @@ export const authUserStore = create<UserState>((set, get) => ({
 }));
 
 
+
 let refreshPromise: Promise<any> | null = null;
 
+// ✅ Axios interceptor with login protection
 axios.interceptors.response.use(
-	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-		if (error.response?.status === 401 && !originalRequest._retry) {
-			originalRequest._retry = true;
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-			try {
-				// If a refresh is already in progress, wait for it to complete
-				if (refreshPromise) {
-					await refreshPromise;
-					return axios(originalRequest);
-				}
+    // ✅ Skip refresh logic for login or refresh requests
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.includes('/auth/refresh')
+    ) {
+      originalRequest._retry = true;
 
-				// Start a new refresh process
-				refreshPromise = authUserStore.getState().refreshToken();
-				await refreshPromise;
-				refreshPromise = null;
+      try {
+        // Wait if another refresh is in progress
+        if (refreshPromise) {
+          await refreshPromise;
+          return axios(originalRequest);
+        }
 
-				return axios(originalRequest);
-			} catch (refreshError) {
-				// If refresh fails, redirect to login or handle as needed
-				authUserStore.getState().logout();
-				return Promise.reject(refreshError);
-			}
-		}
-		return Promise.reject(error);
-	}
+        // Start token refresh
+        refreshPromise = authUserStore.getState().refreshToken();
+        await refreshPromise;
+        refreshPromise = null;
+
+        // Retry original request with new token
+        return axios(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails, logout user
+        authUserStore.getState().logout();
+        return Promise.reject(refreshError);
+      }
+    }
+
+    // ✅ Let error propagate normally
+    return Promise.reject(error);
+  }
 );

@@ -46,7 +46,7 @@ useEffect(() => {
 
 
   return (
-    <div className={cn("flex flex-col gap-6 relative", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form onSubmit={handleSubmit}
@@ -113,7 +113,7 @@ useEffect(() => {
       </div>
 
       {error && (
-        <Alert variant="destructive" className="absolute w-[30rem]  right-30 -top-[14rem]">
+        <Alert variant="destructive" className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 sm:w-full w-[18rem] max-w-md md:max-w-xl px-4">
         <AlertCircleIcon />
         <AlertTitle>Invalid credentials.</AlertTitle>
         <AlertDescription>

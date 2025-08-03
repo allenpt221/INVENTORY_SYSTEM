@@ -61,7 +61,7 @@ function App() {
           {theme === "dark" ? (
             <Sun className="h-6 w-6 text-yellow-500" />
           ) : (
-            <Moon className="h-6 w-6 text-black" />
+            <Moon className="h-6 w-6 text-black/50" />
           )}
         </button>
       )}

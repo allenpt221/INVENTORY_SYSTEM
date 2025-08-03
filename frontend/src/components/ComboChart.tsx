@@ -70,8 +70,8 @@ export function ComboChart() {
 
     const isTrendingUp = percentChange >= 0
     const trendingText = isTrendingUp
-      ? `stock up by ${percentChange.toFixed(2)}% this month`
-      : `stock down by ${Math.abs(percentChange).toFixed(2)}% this month`
+      ? `stock Up by ${percentChange.toFixed(2)}% this month`
+      : `stock Down by ${Math.abs(percentChange).toFixed(2)}% this month`
 
     return {
       chartData: monthly,
@@ -81,7 +81,7 @@ export function ComboChart() {
   }, [stocklog])
 
   return (
-    <Card>
+    <Card className="dark:bg-black">
       <CardHeader>
         <CardTitle>Stock - Bar Chart</CardTitle>
         <CardDescription>January - December {new Date().getFullYear()}</CardDescription>
@@ -121,7 +121,7 @@ export function ComboChart() {
           )}
         </div>
         <div className="text-muted-foreground leading-none">
-          Showing most recent stock entry per month
+          Showing all the stock entry per month
         </div>
       </CardFooter>
     </Card>

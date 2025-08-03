@@ -144,7 +144,8 @@ export const productStore = create<productState>((set, get) => ({
             const updated = get().products.filter(product => product.id !== id);
             set({ products: updated });
 
-           get().disposeProducts();
+            get().getProductLog();
+            get().disposeProducts();
 
         } catch (error: any) {
             console.error('Failed to delete Product:', error);    
