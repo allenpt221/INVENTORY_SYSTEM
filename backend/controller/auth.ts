@@ -350,14 +350,14 @@ class AuthService {
   public async updateAccount(req: Request, res: Response): Promise<void> {
     try {
       const {
-        id, staff_id, username, email, image, role,}: AccountCredentials = req.body;
+        id, staff_id, username, image, role,}: AccountCredentials = req.body;
 
-      if (!username || !email || (role === "staff" ? !staff_id : !id)) {
+      if (!username || (role === "staff" ? !staff_id : !id)) {
         res.status(400).json({ error: "Missing required fields" });
         return;
       }
 
-      const updateFields: Partial<AccountCredentials> = { username, email };
+      const updateFields: Partial<AccountCredentials> = { username };
 
       // Optional image upload
       if (image && image.startsWith("data:image")) {
