@@ -35,6 +35,7 @@ interface SignUpData {
   username: string;
   email: string;
   password: string;
+  image: string;
 }
 
 class AuthService {
@@ -78,7 +79,7 @@ class AuthService {
   public async createStaff(req: Request, res: Response): Promise<void> {
       try {
           const adminId = (req as any).user?.id;
-          const { username, email, password }: SignUpData = req.body;
+          const { username, email, password, image }: SignUpData = req.body;
 
           if (!adminId) {
               res.status(401).json({ error: "Unauthorized" });
@@ -120,6 +121,8 @@ class AuthService {
           // Hash password
           const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
 
+          const defaultProfile = 'https://cdn-icons-png.flaticon.com/512/12225/12225935.png';
+
           // Insert staff
           const { error } = await supabase
               .from('staffAuthentication')
@@ -128,7 +131,8 @@ class AuthService {
                   email: normalizedEmail,
                   password: hashedPassword,
                   role: 'staff',
-                  admin_id: adminId
+                  admin_id: adminId,
+                  image: defaultProfile,
               }]);
 
           if (error) {
@@ -141,7 +145,8 @@ class AuthService {
               message: 'User created successfully',
               staff: {
                   username,
-                  email: normalizedEmail
+                  email: normalizedEmail,
+                  image: defaultProfile
               }
           });
 
