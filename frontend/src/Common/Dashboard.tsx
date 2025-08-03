@@ -13,10 +13,13 @@ import {
 
 import { productStore } from "@/Stores/productStore";
 import { ComboChart } from "@/components/ComboChart";
+import { authUserStore } from "@/Stores/authStore";
 
 export function Dashboard() {
   const dispose = productStore((state) => state.dispose);
+  const staffDetails = authUserStore((state) => state.staffDetails);
   const loading = productStore((state) => state.loading);
+
 
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -36,7 +39,7 @@ export function Dashboard() {
 
       <div className="flex flex-col lg:flex-row justify-between gap-6">
         {/* Disposed Products Table */}
-        <div className="bg-white border rounded-xl shadow p-4 overflow-x-auto w-full h-fit max-h-[28rem]">
+        <div className="bg-white border rounded-xl shadow p-4 overflow-x-auto w-full h-fit max-h-[51rem]">
           <h2 className="text-lg font-medium mb-4">Disposed Products</h2>
 
           <Table className="min-w-[1000px]">
@@ -104,8 +107,39 @@ export function Dashboard() {
         </div>
 
         {/* Placeholder Section */}
-        <div className="lg:w-[40rem] w-full h-fit">
+        <div className="lg:w-[40rem] w-full flex flex-col gap-3">
           <ComboChart />
+          {/* staff table where the manager only access this */}
+          <div className="bg-white border rounded-xl shadow p-4 overflow-x-auto overflow-hidden w-full h-fit">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Username</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Profile</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {staffDetails.map((staff, index) => (
+                <TableRow key={index}>
+                  <TableCell>{staff.username}</TableCell>
+                  <TableCell>{staff.email}</TableCell>
+                  <TableCell>{staff.role}</TableCell>
+                  <TableCell>
+                      <div className="flex justify-center items-center">
+                        <img
+                          src={staff.image}
+                          alt="error fetching profile"
+                          className="w-9 h-9 rounded-full"
+                        />
+                      </div>
+                  </TableCell>
+                </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </div>

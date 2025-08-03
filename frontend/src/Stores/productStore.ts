@@ -116,7 +116,6 @@ export const productStore = create<productState>((set, get) => ({
     getProductLog: async (): Promise<void> => {
         try {
             const res = await axios.get('/inventory/updatelog');
-
             set({inventorylog: res.data.updateLogs})
             set({stocklog: res.data.stockLogs, latest: res.data.latest, loading: false});
         } catch (error) {
@@ -131,6 +130,8 @@ export const productStore = create<productState>((set, get) => ({
             set((prevState) => ({
                 products: [...prevState.products, res.data.product]
             }));
+
+            get().getProductLog();
             
         } catch (error: any) {
             console.error("Error creating product:", error);
@@ -143,6 +144,7 @@ export const productStore = create<productState>((set, get) => ({
             const updated = get().products.filter(product => product.id !== id);
             set({ products: updated });
 
+           get().disposeProducts();
 
         } catch (error: any) {
             console.error('Failed to delete Product:', error);    
@@ -214,7 +216,6 @@ export const productStore = create<productState>((set, get) => ({
     disposeProducts: async () => {
         try {
             const res = await axios.get('inventory/disposelogs');
-
             set({dispose: res.data.dispose, loading: false})
         } catch (error: any) {
             console.log("error fetching the dispose products")

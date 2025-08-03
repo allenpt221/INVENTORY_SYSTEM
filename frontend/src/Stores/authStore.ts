@@ -25,6 +25,7 @@ export type signupStaff = {
 
 interface UserState {
   user: User | null;
+  staffDetails: User[];
   loading: boolean;
   checkingAuth: boolean;
   justLoggedIn: boolean;
@@ -36,10 +37,12 @@ interface UserState {
   checkAuth: () => Promise<void>;
   refreshToken: () => Promise<any>;
   logout: () => Promise<void>;
+  getStaff: () => Promise<void>;
 }
 
 export const authUserStore = create<UserState>((set, get) => ({
   user: null,
+  staffDetails: [],
   loading: false,
   checkingAuth: true,
   justLoggedIn: false,
@@ -51,14 +54,27 @@ export const authUserStore = create<UserState>((set, get) => ({
   // only manager can create staff account
   signupStaff: async(createuser: signupStaff): Promise<void> => {
     try {
-      await axios.post('/auth/signstaff', createuser);
+      const res = await axios.post('/auth/signstaff', createuser);
+
+      set((state) => ({
+      staffDetails: [...state.staffDetails, res.data.staff],
+    }));
 
     } catch (error: any) {
       const message = error?.response?.data?.error || 'Failed to create staff. Please try again.';
         console.error('Signup error:', message);
         throw new Error(message);
     }
-  }, 
+  },
+  
+  getStaff: async (): Promise<void> => {
+    try {
+      const res = await axios.get('auth/getstaff');
+      set({staffDetails: res.data.staff});
+    } catch (error: any) {
+      console.error('Error fetching the staff details:', error);
+    }
+  },
 
   login: async (email: string, password: string): Promise<Boolean> => {
     set({ loading: true });
@@ -106,4 +122,38 @@ export const authUserStore = create<UserState>((set, get) => ({
       throw error;
     }
   },
+
 }));
+
+
+let refreshPromise: Promise<any> | null = null;
+
+axios.interceptors.response.use(
+	(response) => response,
+	async (error) => {
+		const originalRequest = error.config;
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			originalRequest._retry = true;
+
+			try {
+				// If a refresh is already in progress, wait for it to complete
+				if (refreshPromise) {
+					await refreshPromise;
+					return axios(originalRequest);
+				}
+
+				// Start a new refresh process
+				refreshPromise = authUserStore.getState().refreshToken();
+				await refreshPromise;
+				refreshPromise = null;
+
+				return axios(originalRequest);
+			} catch (refreshError) {
+				// If refresh fails, redirect to login or handle as needed
+				authUserStore.getState().logout();
+				return Promise.reject(refreshError);
+			}
+		}
+		return Promise.reject(error);
+	}
+);

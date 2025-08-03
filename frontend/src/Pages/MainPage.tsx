@@ -23,10 +23,12 @@ import { Account } from "@/Modal/Account";
 export function MainPage() {
   const user = authUserStore((state) => state.user);
   const logout = authUserStore((state) => state.logout);
+  const getStaff = authUserStore((state) => state.getStaff);
 
   const getProducts = productStore((state) => state.getProducts);
   const getProductLog = productStore((state) => state.getProductLog);
   const disposeProducts = productStore((state) => state.disposeProducts);
+
 
   
 
@@ -54,6 +56,7 @@ export function MainPage() {
     getProducts();
     getProductLog();
     disposeProducts();
+    getStaff();
   }, []);
 
   useEffect(() => {
