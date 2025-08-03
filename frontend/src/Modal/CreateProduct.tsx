@@ -51,23 +51,63 @@ export function CreateProduct({ isOpen, isClose }: RegisteredProduct) {
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { name, value } = e.target;
-  const parsedValue = ["quantity", "price"].includes(name) ? Number(value) : value;
+  const isNumericField = ["quantity", "price", "barcode"].includes(name);
 
-  // Update the registered values
-  setRegistered((prev) => ({
-    ...prev,
-    [name]: parsedValue,
-  }));
+  if (isNumericField) {
+    // Show error and skip setting if input is empty
+    if (value.trim() === "") {
+      setError((prev) => ({
+        ...prev,
+        [name]: "This field cannot be empty",
+      }));
 
-  // Remove error for the field if value is not empty
-  if (value.trim() !== "") {
+      setRegistered((prev) => ({
+        ...prev,
+        [name]: "", // keep it empty in state
+      }));
+      return;
+    }
+
+    const numericValue = Number(value);
+
+    if (isNaN(numericValue)) {
+      setError((prev) => ({
+        ...prev,
+        [name]: "Please enter a valid number",
+      }));
+      return;
+    }
+
+    setRegistered((prev) => ({
+      ...prev,
+      [name]: numericValue,
+    }));
+
     setError((prev) => {
       const updatedError = { ...prev };
       delete updatedError[name];
       return updatedError;
     });
+  } else {
+    // Handle non-numeric fields
+    setRegistered((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (value.trim() !== "") {
+      setError((prev) => {
+        const updatedError = { ...prev };
+        delete updatedError[name];
+        return updatedError;
+      });
+    }
   }
-}
+};
+
+
+
+
 
 
 
@@ -194,7 +234,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               <Label className="text-sm font-medium">{label}</Label>
               <Input
                 name={name}
-                type={name === "price" ? "number" : "text"}
+                type={"text"}
                 step={name === "price" ? "0.01" : undefined}
                 placeholder={`Enter ${label}`}
                 className="rounded-md"
