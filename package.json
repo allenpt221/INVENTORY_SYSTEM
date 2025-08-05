@@ -4,9 +4,9 @@
   "description": "",
   "main": "backend/index.ts",
   "scripts": {
-  "dev": "nodemon --exec ts-node -r tsconfig-paths/register backend/src/index.ts",
+  "dev": "nodemon --exec ts-node -r tsconfig-paths/register backend/index.ts",
   "build": "tsc --project tsconfig.json && npm install --prefix frontend && npm run build --prefix frontend",
-  "start": "node backend/dist/index.js"
+  "start": "NODE_OPTIONS=--no-deprecation node backend/dist/index.js"
   },
   "keywords": [],
   "author": "",
