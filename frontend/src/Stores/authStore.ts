@@ -67,17 +67,27 @@ export const authUserStore = create<UserState>((set, get) => ({
     }));
 
     } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to create staff. Please try again.';
+        const message = error?.response?.data?.error || 'Failed to create staff. Please try again.';
         console.error('Signup error:', message);
         throw new Error(message);
     }
   },
 
-  signup: async(manageSignup: signupManger): Promise<void> => {
+  signup: async (manageSignup: signupManger): Promise<void> => {
+    set({ loading: true });
     try {
+      const res = await axios.post('/auth/signup', manageSignup);
       
-    } catch (error) {
-      
+      set({ 
+        loading: false,
+        user: res.data.user || null, 
+      });
+            
+    } catch (error: any) {
+      set({ loading: false });
+      const message = error?.response?.data?.error || 'Failed to signup. Please try again.';
+      console.error('Signup error:', message);
+      throw new Error(message);
     }
   },
   
