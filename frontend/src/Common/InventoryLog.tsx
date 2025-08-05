@@ -209,7 +209,7 @@ export function InventoryLog() {
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg bg-white dark:bg-black">
+        <div className="overflow-x-auto rounded-lg bg-white dark:bg-black h-fit max-h-[46rem]">
           <Table className="min-w-[1000px]">
             <TableHeader>
               <TableRow>
