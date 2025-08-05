@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "rootDir": "./backend",     // where your .ts files live
-    "outDir": "./dist",         // where compiled JS files will be output
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "target": "ES2020",
+    "module": "CommonJS",
+    "rootDir": "backend",
+    "outDir": "dist",
     "strict": true,
-    "skipLibCheck": true,
-    "types": ["node"]
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "baseUrl": "backend",
+    "paths": {
+      "@/*": ["*"]
+    }
   },
-  "include": ["backend"]
+  "include": ["backend"],
+  "exclude": ["node_modules", "dist"]
 }
