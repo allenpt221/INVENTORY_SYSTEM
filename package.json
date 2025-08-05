@@ -5,7 +5,9 @@
   "main": "backend/index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node backend/index.ts",
-    "build": "tsc",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:backend": "tsc",
+    "build": "npm run build:frontend && npm run build:backend",
     "start": "node dist/index.js"
   },
   "keywords": [],
