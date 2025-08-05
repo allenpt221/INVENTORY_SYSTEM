@@ -38,9 +38,11 @@ app.use(cookieParser());
 app.use('/api/auth', userRoutes);
 app.use('/api/inventory', inventoryRoutes);
 
+
+
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.join(__dirname, '../frontend');
+  const frontendPath = path.join(__dirname, '../frontend/dist');
 
   app.use(express.static(frontendPath));
 
