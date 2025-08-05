@@ -38,22 +38,31 @@ app.use(cookieParser());
 app.use('/api/auth', userRoutes);
 app.use('/api/inventory', inventoryRoutes);
 
-
-
-// Serve static files in production
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+  next();
+});
 
   const frontendPath = path.join(__dirname, '../frontend/dist');
   app.use(express.static(frontendPath));
 
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.resolve(frontendPath, 'index.html'));
+  app.get(/^\/(?!api).*/, (_req: Request, res: Response) => {
+  res.sendFile(path.resolve(frontendPath, 'index.html'));
   });
 
 
-// Root
+
+
+
 app.get('/', (_req: Request, res: Response) => {
   res.send('Hello from Express + TypeScript (backend/)');
 });
+
+// Serve static files in production
+
+
+// Root
+
 
 // Start server
 app.listen(PORT, () => {
