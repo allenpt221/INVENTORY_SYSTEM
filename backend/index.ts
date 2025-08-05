@@ -62,11 +62,6 @@ app.get('/', (_req: Request, res: Response) => {
   res.send('Hello from Express + TypeScript (backend/)');
 });
 
-// Serve static files in production
-
-
-// Root
-
 
 // Start server
 app.listen(PORT, () => {

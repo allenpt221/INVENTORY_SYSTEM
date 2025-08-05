@@ -4,8 +4,8 @@ import { supabase } from "../supabase/supa-client";
 
 
 interface TokenPayload {
-  id: string;
-  admin_id?: string;
+  id: string; // manager's id
+  staff_id?: string; // only for staff users
 }
 
 
@@ -16,6 +16,7 @@ interface User {
   role: string;
   admin_id?: string;
   image?: string;
+  staff_id?: string;
 }
 
 declare global {
@@ -37,6 +38,7 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
 
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as TokenPayload;
 
+
     // Try finding the user in authentication (admin)
     let { data: user, error } = await supabase
       .from('authentication')
@@ -49,7 +51,7 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
       const staffResult = await supabase
         .from('staffAuthentication')
         .select('*')
-        .eq('admin_id', decoded.admin_id)
+        .eq('staff_id', decoded.staff_id)
         .single();
 
       user = staffResult.data;

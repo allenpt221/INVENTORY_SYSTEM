@@ -7,6 +7,7 @@ import cloudinary from '../lib/cloudinary';
 interface TokenPayload {
   id: string;
   admin_id?: string;
+  staff_id?: string;
 }
 
 interface AuthTokens {
@@ -51,10 +52,10 @@ class AuthService {
     this.jwtSecret = process.env.JWT_SECRET;
   }
 
-  private generateToken(id: string, admin_id?: string): AuthTokens {
+  private generateToken(id: string, staff_id?: string): AuthTokens {
     return {
-      accessToken: jwt.sign({ id, admin_id }, this.jwtSecret, { expiresIn: this.ACCESS_TOKEN_EXPIRY }),
-      refreshToken: jwt.sign({ id, admin_id}, this.jwtSecret, { expiresIn: this.REFRESH_TOKEN_EXPIRY })
+      accessToken: jwt.sign({ id, staff_id }, this.jwtSecret, { expiresIn: this.ACCESS_TOKEN_EXPIRY }),
+      refreshToken: jwt.sign({ id, staff_id}, this.jwtSecret, { expiresIn: this.REFRESH_TOKEN_EXPIRY })
     };
   }
 
@@ -281,13 +282,14 @@ class AuthService {
       }
 
       // Generate token & set cookies
-      const tokens = this.generateToken(user.id, user.admin_id)
+      const tokens = this.generateToken(user.id, user.staff_id)
       this.setCookies(res, tokens);
 
       // Return response
       res.status(200).json({
         message: 'Login successful',
         user: {
+        staff_id: user.staff_id,
         id: user.id,
         username: user.username,
         email: user.email,
@@ -327,7 +329,7 @@ class AuthService {
         return;
       }
 
-      const newTokens = this.generateToken(decoded.id, decoded.admin_id);
+      const newTokens = this.generateToken(decoded.id, decoded.staff_id);
       this.setCookies(res, newTokens);
 
       res.status(200).json({ message: 'Token refreshed successfully' });
