@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "backend/index.ts",
+  "_moduleAliases": {
+    "@": "backend/dist"
+  },
   "scripts": {
-  "dev": "nodemon --exec ts-node -r tsconfig-paths/register backend/index.ts",
-  "build": "tsc --project tsconfig.json && npm install --prefix frontend && npm run build --prefix frontend",
-  "start": "node backend/dist/index.js"
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register backend/index.ts",
+    "build": "tsc --project tsconfig.json && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +24,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "form-data": "^4.0.4"
+    "form-data": "^4.0.4",
+    "module-alias": "^2.2.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

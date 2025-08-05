@@ -10,7 +10,7 @@
     "baseUrl": "backend",
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["backend/**/*.ts"],

@@ -4,10 +4,10 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 
-import { supabase } from '@/supabase/supa-client';
+import { supabase } from './supabase/supa-client';
 
-import userRoutes from '@/routes/auth.router';
-import inventoryRoutes from '@/routes/inventory.router';
+import userRoutes from './routes/auth.router';
+import inventoryRoutes from './routes/inventory.router';
 
 dotenv.config();
 

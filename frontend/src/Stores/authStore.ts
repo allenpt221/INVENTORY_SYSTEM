@@ -23,6 +23,12 @@ export type signupStaff = {
   image?: string;
 }
 
+type signupManger = {
+  username: string;
+  email: string;
+  password: string;
+}
+
 interface UserState {
   user: User | null;
   staffDetails: User[];
@@ -64,6 +70,14 @@ export const authUserStore = create<UserState>((set, get) => ({
       const message = error?.response?.data?.error || 'Failed to create staff. Please try again.';
         console.error('Signup error:', message);
         throw new Error(message);
+    }
+  },
+
+  signup: async(manageSignup: signupManger): Promise<void> => {
+    try {
+      
+    } catch (error) {
+      
     }
   },
   
