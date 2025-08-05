@@ -43,7 +43,6 @@ app.use('/api/inventory', inventoryRoutes);
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.join(__dirname, '../frontend/dist');
-
   app.use(express.static(frontendPath));
 
   app.get('*', (_req: Request, res: Response) => {
