@@ -6,7 +6,7 @@
   "scripts": {
   "dev": "nodemon --exec ts-node -r tsconfig-paths/register backend/index.ts",
   "build": "tsc --project tsconfig.json && npm install --prefix frontend && npm run build --prefix frontend",
-  "start": "NODE_OPTIONS=--no-deprecation node backend/dist/index.js"
+  "start": "node backend/dist/index.js"
   },
   "keywords": [],
   "author": "",
