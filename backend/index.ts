@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import * as path from 'path';
 
 
 import { supabase } from './supabase/supa-client';
@@ -13,6 +14,10 @@ const app = express();
 const PORT = 5000;
 
 dotenv.config();
+
+
+const filePath = path.join(__dirname, 'data', 'file.txt'); // ✅ this is fine
+console.log(filePath);
 
 
 app.use(cors({
@@ -38,7 +43,13 @@ app.use(cookieParser());
 app.use('/api/auth', userRoutes);
 app.use('/api/inventory', inventoryRoutes);
 
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend")));
 
+  app.get("*", (_req, res) => {
+    res.sendFile(path.resolve(__dirname, "../frontend/index.html"));
+  });
+}
 
 
 app.get('/', (_req, res) => {
