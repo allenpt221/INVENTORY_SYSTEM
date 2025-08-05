@@ -2,13 +2,11 @@
   "name": "inventory_management_system",
   "version": "1.0.0",
   "description": "",
-  "main": "backend/index.js",
+  "main": "backend/index.ts",
   "scripts": {
-    "dev": "nodemon --exec ts-node backend/index.ts",
-    "build:frontend": "npm run build --prefix frontend",
-    "build:backend": "tsc",
-    "build": "npm run build:frontend && npm run build:backend",
-    "start": "node dist/index.js"
+  "dev": "nodemon --exec ts-node -r tsconfig-paths/register backend/src/index.ts",
+  "build": "tsc --project tsconfig.json && npm install --prefix frontend && npm run build --prefix frontend",
+  "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"
   }
 }
