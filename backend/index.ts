@@ -46,7 +46,7 @@ app.use((req, res, next) => {
   next();
 });
 
-  const frontendPath = path.join(__dirname, 'frontend');
+  const frontendPath = path.join(__dirname, '../../frontend/dist');
   app.use(express.static(frontendPath));
   console.log(frontendPath)
 
