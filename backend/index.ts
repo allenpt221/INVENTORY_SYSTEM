@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 import { supabase } from './supabase/supa-client';
 
@@ -19,6 +21,7 @@ app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
 }));
+
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -43,8 +46,9 @@ app.use((req, res, next) => {
   next();
 });
 
-  const frontendPath = path.join(__dirname, '../frontend/dist');
+  const frontendPath = path.join(__dirname, 'frontend');
   app.use(express.static(frontendPath));
+  console.log(frontendPath)
 
   app.get(/^\/(?!api).*/, (_req: Request, res: Response) => {
   res.sendFile(path.resolve(frontendPath, 'index.html'));
