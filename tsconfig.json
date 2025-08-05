@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "baseUrl": "backend",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["*"]
     }
