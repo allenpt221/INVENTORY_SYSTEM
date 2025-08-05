@@ -12,6 +12,6 @@
       "@/*": ["*"]
     }
   },
-  "include": ["backend"],
+  "include": ["backend/**/*.ts"],
   "exclude": ["node_modules", "backend/dist"]
 }
