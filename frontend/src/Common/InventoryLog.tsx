@@ -78,6 +78,7 @@ export function InventoryLog() {
   );
 
 
+
   if (user?.role === "request") {
   return (
     <div className="flex items-center justify-center min-h-[70vh]">
@@ -296,7 +297,7 @@ export function InventoryLog() {
                         {logs.productname}
                       </TableCell>
                       <TableCell className="text-center">
-                        ₱{logs.price.toFixed(2)}
+                        ₱{formatNumberPrice(logs.price)}
                       </TableCell>
                       <TableCell className="text-center">
                         {logs.stock}

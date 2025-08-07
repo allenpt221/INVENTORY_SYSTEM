@@ -10,6 +10,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 export function Product() {
   const [search, setSearch] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [hasRequested, setHasRequested] = useState<boolean>(false);
+
+  useEffect(() => {
+  const alreadyRequested = localStorage.getItem("hasRequestedAccess");
+  if (alreadyRequested === "true") {
+    setHasRequested(true);
+  }
+}, []);
 
 
   const user = authUserStore((state) => state.user);
@@ -56,16 +66,6 @@ export function Product() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [hasRequested, setHasRequested] = useState<boolean>(false);
-
-  useEffect(() => {
-  const alreadyRequested = localStorage.getItem("hasRequestedAccess");
-  if (alreadyRequested === "true") {
-    setHasRequested(true);
-  }
-}, []);
 
   const sendRequestAccess = async () => {
     try {
