@@ -45,8 +45,6 @@ export const sendResetPasswordEmail = async (to: string, resetLink: string) => {
         </div>
         `,
     });
-
-    console.log("Reset email sent to", to);
   } catch (error) {
     console.error("Failed to send email:", error);
     throw new Error("Could not send email");
