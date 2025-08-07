@@ -1,7 +1,7 @@
 import express from 'express';
 import { authService } from '../controller/auth';
 import { adminRoute, protectRoute } from '../middleware/auth.middleware';
-import requestHandler from '@/lib/requestHandler';
+import requestHandler from '../lib/requestHandler';
 
 const router = express.Router();
 
