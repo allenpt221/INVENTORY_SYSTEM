@@ -1,4 +1,3 @@
-// utils/email.ts
 import nodemailer from "nodemailer";
 
 export const sendResetPasswordEmail = async (to: string, resetLink: string) => {

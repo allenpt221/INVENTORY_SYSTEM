@@ -7,7 +7,7 @@
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "baseUrl": "backend",
+    "baseUrl": ".",
     "skipLibCheck": true,
     "types": ["node"],
     "paths": {
