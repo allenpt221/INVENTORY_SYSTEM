@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { supabase } from '../supabase/supa-client';
 import cloudinary from '../lib/cloudinary';
-import { sendResetPasswordEmail } from 'middleware/resetaccount';
+import { sendResetPasswordEmail } from '@/middleware/resetaccount';
 
 interface TokenPayload {
   id: string;
