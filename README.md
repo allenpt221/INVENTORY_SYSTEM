@@ -29,7 +29,7 @@ the purpose of the deletion is if the product is wrong details or not anymore pa
 - ✅ Stock management and audit logs
 - ✅ Responsive UI with React, Zustand state management
 - ✅ Automatic Remove background in the images but only limited (using a free tier api) for removing backgound
-- ✅ Send Email when reset the password and implement the email sending when the user requesting to become manager
+- ✅ Send to Email it self when reset the password and implement the email send to the owner of IMS when the user requesting to create/manage products
 
 
 ---
