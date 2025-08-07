@@ -17,6 +17,11 @@ router.put('/account', protectRoute, authService.updateAccount.bind(authService)
 router.get('/getprofile', protectRoute,  authService.getProfile.bind(authService));
 router.get('/getstaff', protectRoute, adminRoute,  authService.ObtainAuthStaff.bind(authService));
 
+router.post('/forgot-password',  authService.forgotPassword.bind(authService));
+router.post('/reset-password', authService.resetPassword.bind(authService));
+
+
+
 
 
 

@@ -8,6 +8,14 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
+  // const signup = authUserStore((state) => state.signup);
+
+  // const handleSignup = (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  // }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">

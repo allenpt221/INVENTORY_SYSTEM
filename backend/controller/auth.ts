@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { supabase } from '../supabase/supa-client';
 import cloudinary from '../lib/cloudinary';
+import { sendResetPasswordEmail } from 'middleware/resetaccount';
 
 interface TokenPayload {
   id: string;
@@ -417,6 +418,109 @@ class AuthService {
     }
   }
 
+  public async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // Search in both tables
+      const { data: user, error } = await supabase
+        .from("authentication")
+        .select("id, email")
+        .eq("email", normalizedEmail)
+        .single();
+
+      let staffUser = null;
+
+      if (error || !user) {
+        const staffResult = await supabase
+          .from("staffAuthentication")
+          .select("staff_id, email")
+          .eq("email", normalizedEmail)
+          .single();
+
+        if (staffResult.error || !staffResult.data) {
+          res.status(404).json({ message: "We couldn't find an account with that email." }); 
+          return 
+        }
+
+        staffUser = staffResult.data;
+      }
+
+      // Token with either id or staff_id
+      const tokenPayload = staffUser
+        ? { staff_id: staffUser.staff_id }
+        : { id: user?.id };
+
+      const token = jwt.sign(tokenPayload, this.jwtSecret, {
+        expiresIn: "15m",
+      });
+
+      const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+
+      await sendResetPasswordEmail(normalizedEmail, resetLink);
+
+      res.status(200).json({ message: "Password reset email sent.", token, resetLink });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  public async resetPassword(req: Request, res: Response): Promise<void> {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      res.status(400).json({ error: "Token and new password are required." });
+      return;
+    }
+
+    let decoded: TokenPayload;
+
+    try {
+      decoded = jwt.verify(token, this.jwtSecret) as TokenPayload;
+    } catch (err) {
+      res.status(400).json({ error: "Invalid or expired token." });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
+
+    if (decoded.staff_id) {
+      const { error } = await supabase
+        .from("staffAuthentication")
+        .update({ password: hashedPassword })
+        .eq("staff_id", decoded.staff_id);
+
+      if (error) {
+        console.error("Staff password update error:", error);
+        res.status(500).json({ error: "Failed to update staff password." });
+        return;
+      }
+    } else if (decoded.id) {
+      const { error } = await supabase
+        .from("authentication")
+        .update({ password: hashedPassword })
+        .eq("id", decoded.id);
+
+      if (error) {
+        console.error("Admin password update error:", error);
+        res.status(500).json({ error: "Failed to update admin password." });
+        return;
+      }
+    } else {
+      res.status(400).json({ error: "Invalid token payload." });
+      return;
+    }
+
+    res.status(200).json({ message: "Password has been reset successfully." });
+
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Server error." });
+  }
+  }
 
 
 }

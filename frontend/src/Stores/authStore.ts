@@ -39,6 +39,7 @@ interface UserState {
   setUser: (user: User) => void;
   clearUser: () => void;
   signupStaff: (createuser: signupStaff) => Promise<void>;
+  signup: (createuser: signupManger) => Promise<void>;
   login: (email: string, password: string) => Promise<Boolean>;
   checkAuth: () => Promise<void>;
   refreshToken: () => Promise<any>;
@@ -105,6 +106,8 @@ export const authUserStore = create<UserState>((set, get) => ({
     try {
       const res = await axios.post('auth/login', { email, password });
       set({ user: res.data.user, loading: false, justLoggedIn: true });
+
+      console.log(res.data.user);
       return true
     } catch (error: any) {
       console.error('Invalid credentials:', error);

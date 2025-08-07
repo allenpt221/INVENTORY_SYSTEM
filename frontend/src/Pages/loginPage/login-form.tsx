@@ -85,11 +85,11 @@ useEffect(() => {
                 {loading ? 'Logging in' : 'Login'}
               </Button>
               <a
-                  href="#"
+                  href="/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+              </a>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <a href="/signup" className="underline underline-offset-4">

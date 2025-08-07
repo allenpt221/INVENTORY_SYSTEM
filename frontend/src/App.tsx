@@ -10,10 +10,11 @@ import { Product } from "./Common/Product";
 
 import { useTheme } from "@/components/ThemProvider";
 import { Moon, Sun } from "lucide-react";
+import { ForgotPasswordPage } from "./Pages/ForgotPasswordPage";
+import LogIn from "./Pages/LogIn";
+import SignUp from "./Pages/Signup";
+import ResetPassword from "./Pages/ResetPassword";
 
-// 🔁 Lazy load login/signup pages for better performance
-const LogIn = lazy(() => import("./Pages/LogIn"));
-const SignUp = lazy(() => import("./Pages/Signup"));
 
 function App() {
   const checkAuth = authUserStore((state) => state.checkAuth);
@@ -24,20 +25,19 @@ function App() {
   const [showInitialLoading, setShowInitialLoading] = useState(true);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
-  // ✅ Only runs once on actual reload
-  useEffect(() => {
-    setMounted(true);
 
+  useEffect(() => {
     const init = async () => {
-      await checkAuth(); // Make sure this is async if using API
+      setMounted(true);
+      await checkAuth(); // wait for auth check to complete
       setHasCheckedAuth(true);
-      setShowInitialLoading(false); // Done after auth check
+      setShowInitialLoading(false);
     };
 
     init();
   }, []);
 
-  // ✅ Only show loading screen during first load
+  //  Only show loading screen during first load
   if (!hasCheckedAuth || showInitialLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -76,6 +76,10 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
+          
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
 
           {/* Protected Routes (nested inside MainPage layout) */}
           {user && (
