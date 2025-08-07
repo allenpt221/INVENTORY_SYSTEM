@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "baseUrl": "backend",
     "skipLibCheck": true,
+    "types": ["node"],
     "paths": {
       "@/*": ["src/*"]
     }
