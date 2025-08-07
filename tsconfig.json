@@ -11,7 +11,7 @@
     "skipLibCheck": true,
     "types": ["node"],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["backend/*"]
     }
   },
   "include": ["backend/**/*.ts"],
