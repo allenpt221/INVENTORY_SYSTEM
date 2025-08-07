@@ -77,6 +77,22 @@ export function InventoryLog() {
       : b.productname.localeCompare(a.productname)
   );
 
+
+  if (user?.role === "request") {
+  return (
+    <div className="flex items-center justify-center min-h-[70vh]">
+      <div className="text-center space-y-4">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          Request Access
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 text-lg max-w-md mx-auto">
+          This user is a request to manage the product. Please wait for approval or contact the administrator.
+        </p>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className="max-w-[1480px] mx-auto px-4">
       {/* Summary Cards */}

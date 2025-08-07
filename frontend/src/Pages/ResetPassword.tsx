@@ -31,6 +31,7 @@ export default function ResetPassword({
     if (success) {
       const timer = setTimeout(() => {
         setSuccess(false);
+        setMessage("");
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -50,10 +51,10 @@ export default function ResetPassword({
       });
 
       setSuccess(true);
-      setMessage("✅ Password has been reset successfully.");
+      setMessage("Password has been reset successfully.");
     } catch (err: any) {
       setMessage(
-        `❌ ${err.response?.data?.error || err.response?.data?.message || err.message}`
+        `${err.response?.data?.error || err.response?.data?.message || err.message}`
       );
     } finally {
       setLoading(false);

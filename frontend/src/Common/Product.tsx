@@ -1,12 +1,18 @@
 import { Input } from "@/components/ui/input";
 import { productStore } from "@/Stores/productStore";
-import { Search } from "lucide-react";
+import { AlertCircleIcon, CheckCircleIcon, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import debounce from "lodash/debounce";
+import { authUserStore } from "@/Stores/authStore";
+import axios from "@/lib/axios";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function Product() {
   const [search, setSearch] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+
+  const user = authUserStore((state) => state.user);
 
   const productSearch = productStore((state) => state.productSearch);
   const products = productStore((state) => state.listProduct) ?? [];
@@ -49,6 +55,96 @@ export function Product() {
   const capitalizeLetter = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
+
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [hasRequested, setHasRequested] = useState<boolean>(false);
+
+  useEffect(() => {
+  const alreadyRequested = localStorage.getItem("hasRequestedAccess");
+  if (alreadyRequested === "true") {
+    setHasRequested(true);
+  }
+}, []);
+
+  const sendRequestAccess = async () => {
+    try {
+      const res = await axios.post("/auth/request-access", {
+        userEmail: user?.email,
+        userName: user?.username,
+      });
+
+      if (res.status === 200) {
+        setSuccess("Request sent successfully!");
+        setError(null);
+        setHasRequested(true);
+        localStorage.setItem("hasRequestedAccess", "true");
+      } else {
+        setError("Something went wrong.");
+        setSuccess(null);
+      }
+    } catch (err: any) {
+      console.error("Request failed:", err);
+      setError("Failed to send access request.");
+      setSuccess(null);
+    }
+
+    // Optional: auto-clear after 5 seconds
+    setTimeout(() => {
+      setSuccess(null);
+      setError(null);
+    }, 5000);
+  };
+
+
+
+// Inside the Product component
+
+  if (user?.role === "request") {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+            Request Access
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-lg max-w-md mx-auto">
+            This user is a request to manage the product. Please click the button below to request access.
+          </p>
+          <button
+            onClick={sendRequestAccess}
+            disabled={hasRequested}
+            className="inline-block px-6 py-3 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition"
+          >
+            {hasRequested ? "Request Sent" : "Send Request Email"}
+          </button>
+        </div>
+        {success && (
+          <Alert className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 sm:w-full w-[18rem] max-w-md md:max-w-xl px-4">
+            <CheckCircleIcon className="text-green-500" />
+            <AlertTitle className="text-green-700">Success</AlertTitle>
+            <AlertDescription className="text-green-600">
+              <p>{success}</p>
+            </AlertDescription>
+          </Alert>
+        )}
+  
+        {error && (
+          <Alert
+            variant="destructive"
+            className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 sm:w-full w-[18rem] max-w-md md:max-w-xl px-4"
+          >
+            <AlertCircleIcon />
+            <AlertTitle>Oops! Something went wrong</AlertTitle>
+            <AlertDescription>
+              <p>{error}</p>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="py-6 max-w-[1490px] mx-auto">

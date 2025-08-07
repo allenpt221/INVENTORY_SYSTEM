@@ -192,15 +192,30 @@ class AuthService {
         return;
       }
 
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanUsername = username.trim().toLowerCase();
+
       // Check if user already exists
-      const { data: existingUser } = await supabase
+      const { data: existingEmail } = await supabase
         .from('authentication')
         .select('email')
-        .eq('email', email.trim().toLowerCase())
-        .single();
+        .eq('email', cleanEmail)
+        .maybeSingle();
 
-      if (existingUser) {
-        res.status(409).json({ error: 'User with this email already exists' });
+      if (existingEmail) {
+        res.status(409).json({ error: 'Email is already in use' });
+        return;
+      }
+
+      // Check if username already exists
+      const { data: existingUsername } = await supabase
+        .from('authentication')
+        .select('username')
+        .eq('username', cleanUsername)
+        .maybeSingle();
+
+      if (existingUsername) {
+        res.status(409).json({ error: 'Username is already taken' });
         return;
       }
 

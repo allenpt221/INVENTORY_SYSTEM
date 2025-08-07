@@ -1,6 +1,7 @@
 import express from 'express';
 import { authService } from '../controller/auth';
 import { adminRoute, protectRoute } from '../middleware/auth.middleware';
+import requestHandler from '@/lib/requestHandler';
 
 const router = express.Router();
 
@@ -19,6 +20,8 @@ router.get('/getstaff', protectRoute, adminRoute,  authService.ObtainAuthStaff.b
 
 router.post('/forgot-password',  authService.forgotPassword.bind(authService));
 router.post('/reset-password', authService.resetPassword.bind(authService));
+router.post('/request-access', requestHandler);
+
 
 
 

@@ -76,6 +76,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
+
           
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />

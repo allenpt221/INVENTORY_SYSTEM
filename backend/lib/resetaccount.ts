@@ -11,7 +11,7 @@ export const sendResetPasswordEmail = async (to: string, resetLink: string) => {
     });
 
     await transporter.sendMail({
-      from: `"Support Team" <${process.env.EMAIL_USER}>`,
+      from: `"StockHub" <${process.env.EMAIL_USER}>`,
       to,
       subject: "Reset Your Password",
       html: `
