@@ -1,5 +1,5 @@
 import { Route, Routes, Navigate } from "react-router-dom";
-import { Suspense, useEffect, useState, lazy } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { authUserStore } from "./Stores/authStore";
 import { MainPage } from "./Pages/MainPage";
