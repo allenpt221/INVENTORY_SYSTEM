@@ -21,24 +21,18 @@ function App() {
   const user = authUserStore((state) => state.user);
 
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [showInitialLoading, setShowInitialLoading] = useState(true);
-  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
-
 
   useEffect(() => {
-    const init = async () => {
-      setMounted(true);
-      await checkAuth(); // wait for auth check to complete
-      setHasCheckedAuth(true);
+    checkAuth();
+    const timer = setTimeout(() => {
       setShowInitialLoading(false);
-    };
-
-    init();
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   //  Only show loading screen during first load
-  if (!hasCheckedAuth || showInitialLoading) {
+  if (showInitialLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="flex flex-col items-center gap-4">
@@ -52,7 +46,7 @@ function App() {
   return (
     <div className="relative bg-background text-foreground h-screen">
       {/* 🌙 Dark/Light Mode Toggle */}
-      {!user && mounted && (
+      {!user && (
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="fixed top-4 right-4 z-50 p-2 rounded-full bg-muted shadow hover:scale-105 transition"
