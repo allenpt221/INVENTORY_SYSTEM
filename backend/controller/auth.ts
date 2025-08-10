@@ -471,7 +471,7 @@ class AuthService {
         expiresIn: "15m",
       });
 
-      const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+      const resetLink = `https://stockhub-l7jk.onrender.com/reset-password?token=${token}`;
 
       await sendResetPasswordEmail(normalizedEmail, resetLink);
 
