@@ -12,6 +12,7 @@ import {
   AlertDescription,
 } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react"
+import { Link } from "react-router-dom"
 
 export function LoginForm({
   className,
@@ -84,17 +85,17 @@ useEffect(() => {
               <Button type="submit" className={`w-full ${loading ? 'opacity-70' : ''}`}>
                 {loading ? 'Logging in' : 'Login'}
               </Button>
-              <a
-                  href="/forgot-password"
+              <Link
+                  to="/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-              </a>
+              </Link>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="/signup" className="underline underline-offset-4">
+                <Link to="/signup" className="underline underline-offset-4">
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </form>

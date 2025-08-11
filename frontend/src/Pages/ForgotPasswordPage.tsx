@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label"; // use correct Label
 import axios from "@/lib/axios";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 export function ForgotPasswordPage({
   className,
@@ -88,12 +89,12 @@ export function ForgotPasswordPage({
                   {loading ? "Sending..." : "Send Reset Link"}
                 </Button>
                 <div className="flex justify-end">
-                    <a
-                        href="/"
+                    <Link
+                        to="/"
                         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
                     >
                         Return to Login
-                    </a>
+                    </Link>
                 </div>
               </form>
 

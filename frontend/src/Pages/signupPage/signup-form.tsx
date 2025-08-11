@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircleIcon, CheckCircleIcon } from "lucide-react"
 import { useState } from "react"
 import { authUserStore } from "@/Stores/authStore"
+import { Link } from "react-router-dom"
 
 export function SignupForm({
   className,
@@ -174,9 +175,9 @@ export function SignupForm({
 
               <div className="text-center text-sm">
                 Already have an account?{" "}
-                <a href="/" className="underline underline-offset-4">
+                <Link to="/" className="underline underline-offset-4">
                   Log In
-                </a>
+                </Link>
               </div>
             </div>
           </form>
