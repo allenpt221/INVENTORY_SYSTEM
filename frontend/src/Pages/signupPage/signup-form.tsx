@@ -121,6 +121,7 @@ export function SignupForm({
                   id="username"
                   type="text"
                   name="username"
+                  maxLength={18}
                   value={signupForm.username}
                   onChange={handleChange}
                   placeholder="John Doe"

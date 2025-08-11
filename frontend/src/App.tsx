@@ -59,19 +59,10 @@ function App() {
           )}
         </button>
       )}
-
-      {/* ✅ Use Suspense to handle lazy-loaded routes */}
-      <Suspense fallback={
-        <div className="flex justify-center items-center h-screen">
-          <div className="w-8 h-8 border-4 border-muted border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      }>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
-
-          
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
@@ -98,7 +89,6 @@ function App() {
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to={user ? "/" : "/"} replace />} />
         </Routes>
-      </Suspense>
     </div>
   );
 }

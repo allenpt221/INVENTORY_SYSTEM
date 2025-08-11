@@ -122,8 +122,8 @@ export function AppSidebar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="cursor-pointer">
                 <div className="flex items-center w-full gap-2 px-1 py-2 rounded hover:bg-accent cursor-pointer">
-                  <img src={profile} alt="error load image" className="w-5 h-full rounded-full" /> 
-                  <span className="text-sm">{email}</span>
+                  <img src={profile} alt="error load image" className="w-6 h-6 rounded-full" /> 
+                  <span className="text-sm overflow-ellipsis line-clamp-2">{email}</span>
                   <ChevronUp className="ml-auto" />
                 </div>
               </DropdownMenuTrigger>
