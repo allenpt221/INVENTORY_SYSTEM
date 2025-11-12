@@ -305,9 +305,9 @@ export function InventoryLog() {
                       <TableCell className="text-center">
                         <span
                           className={`${
-                            logs.stock_status === "increase"
+                            logs.stock_status === "Increase"
                               ? "bg-green-500/20 text-green-600 border-green-600"
-                              : logs.stock_status === "decrease"
+                              : logs.stock_status === "Decrease"
                               ? "bg-red-500/20 text-red-600 border-red-600"
                               : "bg-yellow-500/20 text-yellow-600 border-yellow-600"
                           } px-2 py-0.5 border rounded-full text-xs font-medium`}

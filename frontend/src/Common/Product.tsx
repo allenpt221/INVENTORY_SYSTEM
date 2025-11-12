@@ -22,7 +22,6 @@ export function Product() {
   const getAllProducts = productStore((state) => state.getProducts);
   const loading = productStore((state) => state.loading);
 
-
   const ITEMS_PER_PAGE = 12;
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
 

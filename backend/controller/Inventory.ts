@@ -52,7 +52,7 @@ class InventoryController {
         }
 
         const [totalsBefore, imageUrl] = await Promise.all([
-            supabase.from("Inventory").select("total, quantity"),
+            supabase.from("Inventory").select("total, quantity").eq("user_id", userId),
             (async () => {
             if (image && image.startsWith("data:image")) {
                 try {
@@ -182,145 +182,143 @@ class InventoryController {
         try {
             const itemId = req.params.id;
             const user = req.user;
+            const userId = user?.id;
             const userEmail = user?.email;
-            const { quantity }: { quantity: number } = req.body;
-
-            if (typeof quantity !== 'number' || isNaN(quantity)) {
-            res.status(400).json({ error: 'Quantity must be a valid number' });
-            return;
-            }
 
             if (!user) {
-            res.status(401).json({ error: "User not authenticated" });
-            return;
+                res.status(401).json({ error: "User not authenticated" });
+                return
             }
 
-            const userIdToQuery = user.role === 'staff' ? user.admin_id : user.id;
+            const { quantity }: { quantity: number } = req.body;
+
+            if (typeof quantity !== "number" || isNaN(quantity) || quantity < 0) {
+                res.status(400).json({ error: "Quantity must be a valid number >= 0" });
+                return
+            }
+
+            const userIdToQuery = user.role === "staff" ? user.admin_id : user.id;
 
             // Fetch current item
             const { data: item, error: fetchError } = await supabase
-            .from('Inventory')
-            .select('*')
-            .eq('id', itemId)
-            .single();
+                .from("Inventory")
+                .select("*")
+                .eq("id", itemId)
+                .eq("user_id", userId)
+                .single();
 
             if (fetchError || !item) {
-            console.error('Fetch error:', fetchError?.message);
-            res.status(404).json({ error: 'Item not found' });
-            return;
+                console.error("Fetch error:", fetchError?.message);
+                res.status(404).json({ error: "Item not found" });
+                return
             }
 
-            const previousStock = item.quantity;
-
-            if (quantity === previousStock) {
-            console.log('No stock change');
-            res.status(400).json({ message: 'No stock changes' });
-            return;
-            }
-
-            // Fetch total_before_all
-            const { data: allBefore } = await supabase
-            .from("Inventory")
-            .select("total, quantity");
-
-            const totalBeforeAll =
-            allBefore?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
-            const stockBeforeAll =
-            allBefore?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
-
-            // Calculate new total
+            const previousStock = item.quantity;   // previous quantity of this item
             const price = Number(item.price);
+
             if (isNaN(price)) {
-            res.status(500).json({ error: 'Invalid price in database' });
-            return;
+                res.status(500).json({ error: "Invalid price in database" });
+                return
             }
+
+            // Directly set the quantity to the user input
             const total = quantity * price;
 
             // Update Inventory
             const { data: updatedItem, error: updateError } = await supabase
-            .from('Inventory')
-            .update({ quantity, total })
-            .eq('id', itemId)
-            .select('id, quantity, price, total')
-            .single();
+                .from("Inventory")
+                .update({ quantity, total })
+                .eq("id", itemId)
+                .eq("user_id", userId)
+                .select("id, quantity, price, total")
+                .single();
 
             if (updateError || !updatedItem) {
-            console.error('Update error:', updateError?.message);
-            res.status(500).json({ error: 'Failed to update inventory' });
-            return;
+                console.error("Update error:", updateError?.message);
+                res.status(500).json({ error: "Failed to update inventory" });
+                return
             }
 
-            // Fetch total_after_all
+            // Determine stock status for this item
+            let stockStatus = "";
+            if (quantity > previousStock) {
+                stockStatus = "Increase";
+            } else if (quantity < previousStock) {
+                stockStatus = "Decrease";
+            } else {
+                stockStatus = "No Change";
+            }
+
+            // Fetch totals for this user
             const { data: allAfter } = await supabase
-            .from("Inventory")
-            .select("total, quantity");
+                .from("Inventory")
+                .select("total, quantity")
+                .eq("user_id", userId);
 
-            const totalAfterAll =
-            allAfter?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
-            const stockAfterAll =
-            allAfter?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+            const totalAfterAll = allAfter?.reduce((sum, i) => sum + (i.total || 0), 0) || 0;
+            const stockAfterAll = allAfter?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0;
 
-            // Log stock update
-            const stockStatus = quantity > previousStock ? "increase" : "decrease";
-
+            // Log stock update per item
             const { data: insertedLogs, error: logError } = await supabase
-            .from('after_update_the_stock')
-            .insert([
-                {
-                userId: userIdToQuery,
-                productname: item.productName,
-                stock_status: stockStatus,
-                stock: quantity,
-                price: item.price,
-                total: total,
-                previous_total: item.total,
-                updateby: userEmail,
-                created_at: new Date().toISOString(),
-                },
-            ])
-            .select()
-            .single();
+                .from("after_update_the_stock")
+                .insert([
+                    {
+                        userId: userIdToQuery,
+                        productname: item.productName,
+                        stock_status: stockStatus,
+                        stock: quantity,
+                        price: price,
+                        total: total,
+                        previous_total: item.total,
+                        updateby: userEmail,
+                        created_at: new Date().toISOString(),
+                    },
+                ])
+                .select()
+                .single();
 
             if (logError) {
-            throw new Error('Error logging stock change: ' + logError.message);
+                throw new Error("Error logging stock change: " + logError.message);
             }
 
-            // Log stock management totals
+            // Log stock management totals per user
             const { data: insertedTotal, error: stockError } = await supabase
-            .from("stock_management")
-            .insert([
-                {
-                user_id: userIdToQuery,
-                stock_before: stockBeforeAll,
-                current_stock: stockAfterAll,
-                before_price: item.price,
-                current_price: item.price,
-                total_before: totalBeforeAll,
-                current_total: totalAfterAll,
-                created_at: new Date().toISOString(),
-                },
-            ])
-            .select()
-            .single();
+                .from("stock_management")
+                .insert([
+                    {
+                        user_id: userIdToQuery,
+                        stock_before: stockAfterAll - quantity + previousStock,
+                        current_stock: stockAfterAll,
+                        before_price: item.price,
+                        current_price: price,
+                        total_before: totalAfterAll - total + item.total,
+                        current_total: totalAfterAll,
+                        created_at: new Date().toISOString(),
+                    },
+                ])
+                .select()
+                .single();
 
             if (stockError) {
-            console.error("Stock management insert failed:", stockError.message);
+                console.error("Stock management insert failed:", stockError.message);
             }
 
             res.status(200).json({
-            message: 'Updated successfully',
-            stock: updatedItem,
-            log: insertedLogs,
-            latestTotal: insertedTotal?.current_total || 0,
+                message: "Stock updated successfully",
+                stock: updatedItem,
+                log: insertedLogs,
+                latestTotal: insertedTotal?.current_total || 0,
             });
 
         } catch (error) {
-            console.error('Server error:', error);
-            res.status(500).json({ error: 'Internal server error' });
-            return;
+            console.error("Server error:", error);
+            res.status(500).json({ error: "Internal server error" });
         }
     }
-   
+
+
+
+
 
     public async updateProduct(req: Request, res: Response): Promise<void> {
         try {
@@ -337,6 +335,7 @@ class InventoryController {
             }: InventoryItem = req.body;
 
             const user = req.user;
+            const userId = req.user?.id;
 
             if (!id) {
             res.status(400).json({ error: "Missing product ID" });
@@ -364,7 +363,7 @@ class InventoryController {
             // 2. Get total_before_all
             const { data: allItemsBefore, error: fetchAllBeforeError } = await supabase
             .from("Inventory")
-            .select("total, quantity");
+            .select("total, quantity").eq("user_id", userId);
 
             if (fetchAllBeforeError || !allItemsBefore) {
             console.error("Error fetching totals before update:", fetchAllBeforeError?.message);
@@ -416,7 +415,8 @@ class InventoryController {
             // 5. Get total_after_all
             const { data: allItemsAfter, error: fetchAllAfterError } = await supabase
             .from("Inventory")
-            .select("total, quantity");
+            .select("total, quantity")
+            .eq("user_id", userId);
 
             if (fetchAllAfterError || !allItemsAfter) {
             console.error("Error fetching totals after update:", fetchAllAfterError?.message);
@@ -498,6 +498,8 @@ class InventoryController {
         try {
             const { id } = req.params;
             const user = req.user; 
+            const userId = req.user?.id; 
+
 
 
             const { data: existingItem, error: fetchError } = await supabase
@@ -571,7 +573,8 @@ class InventoryController {
 
             const { data: allItemsAfter, error: fetchAfterError } = await supabase
                 .from("Inventory")
-                .select("total, quantity");
+                .select("total, quantity")
+                .eq('user_id', userId);
 
             if (fetchAfterError) {
                 console.error("Error fetching totals after delete:", fetchAfterError.message);
