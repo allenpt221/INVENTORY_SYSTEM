@@ -262,7 +262,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               <button
                 type="button"
                 onClick={handleGenerateBarcode}
-                className="px-3 py-1 rounded-md bg-black text-white hover:bg-gray-200 text-sm dark:bg-white dark:border dark:text-black font-medium"
+                className="px-3 py-1 rounded-md bg-black text-white hover:bg-gray-500 text-sm dark:bg-white dark:border dark:text-black font-medium"
               >
                 Auto
               </button>

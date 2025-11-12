@@ -309,7 +309,8 @@ export function InventoryLog() {
                               ? "bg-green-500/20 text-green-600 border-green-600"
                               : logs.stock_status === "decrease"
                               ? "bg-red-500/20 text-red-600 border-red-600"
-                              : "bg-yellow-500/20 text-yellow-600 border-yellow-600"
+                              : logs.stock_status === "New" ? "bg-yellow-500/20 text-yellow-600 border-yellow-600"
+                              : "bg-gray-500/20 text-gray-600 border-gray-600"
                           } px-2 py-0.5 border rounded-full text-xs font-medium`}
                         >
                           {capitalizedFirstLetter(logs.stock_status)}

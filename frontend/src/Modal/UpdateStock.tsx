@@ -63,7 +63,7 @@ export function UpdateStock({ isOpen, isClose, updatedStock, updateStock }: Stoc
         {/* Input Field */}
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <input
-            type="text"
+            type="number"
             value={quantity}
             onChange={handleInputChange}
             className="border p-2 rounded w-full mb-4"

@@ -177,7 +177,6 @@ class AuthService {
         res.status(200).json({success:true, user: users})
 
     } catch (error: any) {
-      console.log('get all user', error)
       res.status(400).json({error: 'Internal Server Error'})
     }
   }
@@ -316,7 +315,6 @@ class AuthService {
       });
 
     } catch (error) {
-      console.error('Login error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   }
@@ -350,7 +348,6 @@ class AuthService {
 
       res.status(200).json({ message: 'Token refreshed successfully' });
     } catch (error: any) {
-      console.error('Token refresh error:', error.message || error);
       res.status(401).json({ error: 'Invalid refresh token' });
     }
   }
@@ -408,17 +405,19 @@ class AuthService {
       });
 
     } catch (error) {
-      console.error("Unexpected error:", error);
       res.status(500).json({ error: "Server error" });
     }
   }
 
   public async ObtainAuthStaff(req: Request, res: Response): Promise<void> {
     try {
+      const user = req.user;
+      const userId = user?.role === "staff" ? user.admin_id : user?.id;
 
       const {data, error} = await supabase 
       .from("staffAuthentication")
       .select("*")
+      .eq('admin_id', userId);
 
       if(error){
         console.error("Supabase update error:", error);
@@ -532,7 +531,6 @@ class AuthService {
     res.status(200).json({ message: "Password has been reset successfully." });
 
   } catch (error) {
-    console.error("Reset password error:", error);
     res.status(500).json({ error: "Server error." });
   }
   }
