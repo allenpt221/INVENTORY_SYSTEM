@@ -119,20 +119,20 @@ export function InventoryLog() {
               ₱{formatNumberPrice(latest?.latestTotal ?? 0)}
               <span
                 className={`flex items-center gap-1 text-sm font-medium ${
-                  (latest?.beforetotal ?? 0) > (latest?.latestTotal ?? 0)
+                  (latest?.latestTotal ?? 0) > (latest?.beforetotal ?? 0)
                     ? "text-green-500"
                     : (latest?.latestTotal ?? 0) === (latest?.beforetotal ?? 0)
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
-                {(latest?.beforetotal ?? 0) > (latest?.latestTotal ?? 0) ? (
+                {(latest?.latestTotal ?? 0) > (latest?.beforetotal ?? 0) ? (
                   <ArrowUpRight size={16} />
-                ) : (latest?.beforetotal ?? 0) ===
-                  (latest?.latestTotal ?? 0) ? (
+                ) : (latest?.latestTotal ?? 0) ===
+                  (latest?.beforetotal ?? 0) ? (
                   <ArrowUpRight size={16} />
                 ) : (
-                  <ArrowDownRight size={16} />
+                    <ArrowDownRight size={16} />
                 )}
                 {latestPercentage.toFixed(2)}%
               </span>
@@ -147,14 +147,14 @@ export function InventoryLog() {
               {latest?.latestStock ?? 0}
               <span
                 className={`flex items-center gap-1 text-sm font-medium ${
-                  (latest?.beforestock ?? 0) > (latest?.latestStock ?? 0)
+                  (latest?.latestStock ?? 0) > (latest?.beforestock ?? 0)
                     ? "text-green-500"
-                    : (latest?.beforestock ?? 0) === (latest?.latestStock ?? 0)
+                    : (latest?.latestStock ?? 0) === (latest?.beforestock ?? 0)
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
-                {(latest?.beforestock ?? 0) > (latest?.latestStock ?? 0) ? (
+                {(latest?.latestStock ?? 0) > (latest?.beforestock ?? 0) ? (
                   <ArrowUpRight size={16} />
                 ) : (latest?.beforestock ?? 0) ===
                   (latest?.latestStock ?? 0) ? (
