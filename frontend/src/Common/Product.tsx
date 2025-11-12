@@ -66,10 +66,9 @@ export function Product() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-
   const sendRequestAccess = async () => {
     try {
-      const res = await axios.post("/auth/request-access", {
+      const res = await axios.post("auth/request-access", {
         userEmail: user?.email,
         userName: user?.username,
       });
@@ -96,10 +95,9 @@ export function Product() {
     }, 5000);
   };
 
-
+console.log("hasRequested:", hasRequested);
 
 // Inside the Product component
-
   if (user?.role === "request") {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -113,9 +111,10 @@ export function Product() {
           <button
             onClick={sendRequestAccess}
             disabled={hasRequested}
-            className="inline-block px-6 py-3 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition"
+            className={`inline-block px-6 py-3 bg-black
+             dark:bg-white dark:text-black ${hasRequested ? "bg-black/50 cursor-not-allowed" : "bg-black/20 hover:bg-black/30 cursor-pointer"} text-white rounded-lg shadow transition`}
           >
-            {hasRequested ? "Request Sent" : "Send Request Email"}
+            {hasRequested ? "Send Request Email" : "Request Sent"}
           </button>
         </div>
         {success && (

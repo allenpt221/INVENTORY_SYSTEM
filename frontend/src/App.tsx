@@ -45,7 +45,7 @@ function App() {
 
   return (
     <div className="relative bg-background text-foreground h-screen">
-      {/* 🌙 Dark/Light Mode Toggle */}
+      {/*  Dark/Light Mode Toggle */}
       {!user && (
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
