@@ -98,7 +98,7 @@ class InventoryController {
         const totalBeforeAll = totalsBefore.data?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
         const stockBeforeAll = totalsBefore.data?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
-        const totalsAfter = await supabase.from("Inventory").select("total, quantity");
+        const totalsAfter = await supabase.from("Inventory").select("total, quantity").eq("user_id", userId);
         const totalAfterAll = totalsAfter.data?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
         const stockAfterAll = totalsAfter.data?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
