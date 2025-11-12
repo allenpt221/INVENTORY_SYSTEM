@@ -14,13 +14,6 @@ export function Product() {
   const [error, setError] = useState<string | null>(null);
   const [hasRequested, setHasRequested] = useState<boolean>(false);
 
-  useEffect(() => {
-  const alreadyRequested = localStorage.getItem("hasRequestedAccess");
-  if (alreadyRequested === "true") {
-    setHasRequested(true);
-  }
-}, []);
-
 
   const user = authUserStore((state) => state.user);
 
@@ -77,7 +70,6 @@ export function Product() {
         setSuccess("Request sent successfully!");
         setError(null);
         setHasRequested(true);
-        localStorage.setItem("hasRequestedAccess", "true");
       } else {
         setError("Something went wrong.");
         setSuccess(null);
@@ -95,8 +87,6 @@ export function Product() {
     }, 5000);
   };
 
-console.log("hasRequested:", hasRequested);
-
 // Inside the Product component
   if (user?.role === "request") {
     return (
@@ -112,7 +102,7 @@ console.log("hasRequested:", hasRequested);
             onClick={sendRequestAccess}
             disabled={hasRequested}
             className={`inline-block px-6 py-3 bg-black
-             dark:bg-white dark:text-black ${hasRequested ? "bg-black/50 cursor-not-allowed" : "bg-black/20 hover:bg-black/30 cursor-pointer"} text-white rounded-lg shadow transition`}
+             dark:bg-white dark:text-black ${hasRequested ? "bg-black/50 cursor-not-allowed" : "bg-black hover:bg-black/30 cursor-pointer"} text-white rounded-lg shadow transition`}
           >
             {hasRequested ? "Send Request Email" : "Request Sent"}
           </button>
