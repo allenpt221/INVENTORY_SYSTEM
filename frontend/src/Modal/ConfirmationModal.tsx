@@ -33,7 +33,7 @@ export const ConfirmationModal = ({
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-black text-white rounded-md text-sm hover:bg-black/50 dark:bg-white dark:text-black"
+            className="px-4 py-2 bg-black cursor-pointer text-white rounded-md text-sm hover:bg-black/50 dark:bg-white dark:text-black"
           >
             Delete
           </button>
