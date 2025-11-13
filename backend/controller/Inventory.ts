@@ -52,13 +52,9 @@ class InventoryController {
         }
 
         const [totalsBefore, imageUrl] = await Promise.all([
-<<<<<<< HEAD
             supabase.from("Inventory")
             .select("total, quantity")
             .eq("user_id", userId),
-=======
-            supabase.from("Inventory").select("total, quantity").eq("user_id", userId),
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
             (async () => {
             if (image && image.startsWith("data:image")) {
                 try {
@@ -191,11 +187,7 @@ class InventoryController {
         try {
             const itemId = req.params.id;
             const user = req.user;
-<<<<<<< HEAD
             const userId = user?.role === "staff" ? user.admin_id : user?.id;
-=======
-            const userId = user?.id;
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
             const userEmail = user?.email;
 
             if (!user) {
@@ -255,15 +247,9 @@ class InventoryController {
             // Determine stock status for this item
             let stockStatus = "";
             if (quantity > previousStock) {
-<<<<<<< HEAD
                 stockStatus = "increase";
             } else if (quantity < previousStock) {
                 stockStatus = "decrease";
-=======
-                stockStatus = "Increase";
-            } else if (quantity < previousStock) {
-                stockStatus = "Decrease";
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
             } else {
                 stockStatus = "No Change";
             }
@@ -334,13 +320,6 @@ class InventoryController {
             res.status(500).json({ error: "Internal server error" });
         }
     }
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
 
     public async updateProduct(req: Request, res: Response): Promise<void> {
         try {
@@ -357,12 +336,8 @@ class InventoryController {
             }: InventoryItem = req.body;
 
             const user = req.user;
-<<<<<<< HEAD
             const userId = user?.role === "staff" ? user.admin_id : user?.id;
             const userEmail = user?.email || "Unknown"; // Get user email for logging
-=======
-            const userId = req.user?.id;
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
 
             if (!id) {
                 res.status(400).json({ error: "Missing product ID" });
@@ -389,14 +364,9 @@ class InventoryController {
 
             // Get total_before_all
             const { data: allItemsBefore, error: fetchAllBeforeError } = await supabase
-<<<<<<< HEAD
                 .from("Inventory")
                 .select("total, quantity")
                 .eq("user_id", userId);
-=======
-            .from("Inventory")
-            .select("total, quantity").eq("user_id", userId);
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
 
             if (fetchAllBeforeError || !allItemsBefore) {
                 console.error("Error fetching totals before update:", fetchAllBeforeError?.message);
@@ -447,15 +417,9 @@ class InventoryController {
 
             // Get total_after_all
             const { data: allItemsAfter, error: fetchAllAfterError } = await supabase
-<<<<<<< HEAD
                 .from("Inventory")
                 .select("total, quantity")
                 .eq("user_id", userId);
-=======
-            .from("Inventory")
-            .select("total, quantity")
-            .eq("user_id", userId);
->>>>>>> e71472d1d0d146c9c7f90aaacf5086826b01c63b
 
             if (fetchAllAfterError || !allItemsAfter) {
                 console.error("Error fetching totals after update:", fetchAllAfterError?.message);
