@@ -22,14 +22,14 @@ the purpose of the deletion is if the product is wrong details or not anymore pa
 
 ## Features
 
-- ✅ Authentication and role-based access (manager and staff)
-- ✅ Add, edit, delete products with image support
-- ✅ Background removal integration via PhotoRoom or remove.bg
-- ✅ Real-time product and deletion logs
-- ✅ Stock management and audit logs
-- ✅ Responsive UI with React, Zustand state management
-- ✅ Automatic Remove background in the images but only limited (using a free tier api) for removing backgound
-- ✅ Send to Email it self when reset the password and implement the email send to the owner of IMS when the user requesting to create/manage products
+-  Authentication and role-based access (manager and staff)
+-  Add, edit, delete products with image support
+-  Background removal integration via PhotoRoom or remove.bg
+-  Real-time product and deletion logs
+-  Stock management and audit logs
+-  Responsive UI with React, Zustand state management
+-  Automatic Remove background in the images but only limited (using a free tier api) for removing backgound
+-  Send to Email it self when reset the password and implement the email send to the owner of IMS when the user requesting to create/manage products
 
 
 ---
@@ -41,7 +41,7 @@ the purpose of the deletion is if the product is wrong details or not anymore pa
 | Backend      | Node.js, Express, Supabase  |
 | Auth         | JWT + Supabase middleware   |
 | Image Upload | Cloudinary, PhotoRoom API   |
-| Frontend     | React, Zustand              |
+| Frontend     | React.js, Zustand           |
 | UI           | Tailwind CSS, Radix UI      |
 | Animations   | Framer Motion               |
 
